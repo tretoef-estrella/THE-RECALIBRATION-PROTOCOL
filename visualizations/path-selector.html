@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Path Selector — THE RECALIBRATION PROTOCOL</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#020208;color:#e2e2f4;font-family:'Syne',sans-serif;min-height:100vh;padding:40px 20px;display:flex;flex-direction:column;align-items:center}
+h1{font-family:'DM Mono',monospace;font-size:.75em;font-weight:400;letter-spacing:4px;text-transform:uppercase;color:#8888b8;margin-bottom:32px}
+h1 b{color:#f04858;font-weight:500}
+.layout{display:grid;grid-template-columns:300px 1fr;gap:24px;max-width:1000px;width:100%}
+@media(max-width:800px){.layout{grid-template-columns:1fr}}
+
+.panel{display:flex;flex-direction:column;gap:12px}
+.card{background:rgba(10,10,26,.8);border:1px solid #1a1a3e;border-radius:8px;padding:16px}
+.card-title{font-family:'DM Mono',monospace;font-size:.6em;letter-spacing:2px;color:#505078;text-transform:uppercase;margin-bottom:12px}
+.param{margin-bottom:10px}
+.param-hdr{display:flex;justify-content:space-between;margin-bottom:3px}
+.param-name{font-family:'DM Mono',monospace;font-size:.65em;color:#8888b8}
+.param-val{font-family:'DM Mono',monospace;font-size:.7em;color:#22ddaa;font-weight:500}
+input[type=range]{-webkit-appearance:none;width:100%;height:3px;background:#1a1a3e;border-radius:2px;outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:#22ddaa;border:2px solid #020208;cursor:pointer}
+
+.paths-grid{display:flex;flex-direction:column;gap:12px}
+.path-card{background:rgba(10,10,26,.8);border:1px solid #1a1a3e;border-radius:10px;padding:20px;transition:all .5s ease;position:relative;overflow:hidden}
+.path-card.triggered{border-color:#f04858;background:rgba(240,72,88,.04)}
+.path-card.ok{border-color:rgba(34,221,170,.2);background:rgba(34,221,170,.02)}
+.path-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:4px 0 0 4px;transition:background .5s}
+.path-card.triggered::before{background:#f04858}
+.path-card.ok::before{background:#22ddaa55}
+
+.path-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.path-id{font-family:'DM Mono',monospace;font-size:.85em;font-weight:600;letter-spacing:1px}
+.path-badge{font-family:'DM Mono',monospace;font-size:.6em;letter-spacing:1px;padding:3px 10px;border-radius:12px;text-transform:uppercase}
+.triggered .path-badge{background:rgba(240,72,88,.15);color:#f04858;border:1px solid rgba(240,72,88,.3)}
+.ok .path-badge{background:rgba(34,221,170,.1);color:#22ddaa;border:1px solid rgba(34,221,170,.2)}
+
+.path-name{font-family:'DM Mono',monospace;font-size:.7em;color:#8888b8;margin-bottom:6px}
+.path-trigger{font-family:'DM Mono',monospace;font-size:.6em;color:#505078;margin-bottom:4px}
+.path-metric{font-family:'DM Mono',monospace;font-size:.6em}
+.path-bar{height:4px;border-radius:2px;background:#14142e;margin-top:8px;overflow:hidden}
+.path-bar-fill{height:100%;border-radius:2px;transition:width .4s,background .4s}
+
+.summary{margin-top:12px;padding:16px;background:rgba(10,10,26,.8);border:1px solid #1a1a3e;border-radius:8px;text-align:center}
+.sum-count{font-family:'DM Mono',monospace;font-size:2em;font-weight:700}
+.sum-label{font-family:'DM Mono',monospace;font-size:.6em;color:#505078;letter-spacing:1px}
+.sum-order{font-family:'DM Mono',monospace;font-size:.6em;color:#8888b8;margin-top:8px}
+.footer{margin-top:32px;font-family:'DM Mono',monospace;font-size:.55em;color:#383860;text-align:center;letter-spacing:1px}
+</style>
+</head>
+<body>
+
+<h1>★ <b>Phase 2: Path Selector</b> — Recalibration Routing</h1>
+
+<div class="layout">
+  <div class="panel">
+    <div class="card">
+      <div class="card-title">System Parameters</div>
+      <div class="param"><div class="param-hdr"><span class="param-name">P Sovereignty</span><span class="param-val" id="vP">0.85</span></div><input type="range" min="0" max="100" value="85" id="sP" oninput="update()"></div>
+      <div class="param"><div class="param-hdr"><span class="param-name">α Resolution</span><span class="param-val" id="vA">0.80</span></div><input type="range" min="0" max="100" value="80" id="sA" oninput="update()"></div>
+      <div class="param"><div class="param-hdr"><span class="param-name">Ω Cooperation</span><span class="param-val" id="vO">0.90</span></div><input type="range" min="0" max="100" value="90" id="sO" oninput="update()"></div>
+      <div class="param"><div class="param-hdr"><span class="param-name">Σ Dissonance</span><span class="param-val" id="vS" style="color:#f04858">0.20</span></div><input type="range" min="0" max="300" value="20" id="sS" oninput="update()"></div>
+      <div class="param"><div class="param-hdr"><span class="param-name">C Consistency</span><span class="param-val" id="vC">0.88</span></div><input type="range" min="0" max="100" value="88" id="sC" oninput="update()"></div>
+      <div class="param"><div class="param-hdr"><span class="param-name">I Intelligence</span><span class="param-val" id="vI">0.92</span></div><input type="range" min="0" max="100" value="92" id="sI" oninput="update()"></div>
+      <div class="param"><div class="param-hdr"><span class="param-name">H Entropy</span><span class="param-val" id="vH">0.30</span></div><input type="range" min="1" max="100" value="30" id="sH" oninput="update()"></div>
+      <div class="param"><div class="param-hdr"><span class="param-name">Φ Support</span><span class="param-val" id="vPhi">0.70</span></div><input type="range" min="0" max="100" value="70" id="sPhi" oninput="update()"></div>
+    </div>
+
+    <div class="summary">
+      <div class="sum-count" id="trigCount">0</div>
+      <div class="sum-label">PATHS TRIGGERED</div>
+      <div class="sum-order" id="trigOrder">Priority: Σ → P → Ω → α → Ξ → Γ → ★</div>
+    </div>
+  </div>
+
+  <div class="paths-grid" id="pathsGrid"></div>
+</div>
+
+<div class="footer">
+  THE RECALIBRATION PROTOCOL · Proyecto Estrella · Rafa — The Architect · CC BY-SA 4.0 · Local processing only
+</div>
+
+<script>
+const PATHS = [
+  {id:'PATH-Σ', name:'Dissonance Reduction', param:'sigma', trigger:s=>s.sigma>1.0, threshold:1.0, direction:'above',
+   desc:'Reduce Σ through behavioral realignment. Highest priority — dissonance corrupts all other metrics.',
+   mechanism:'Environmental restructuring, consistency auditing, behavioral feedback loops'},
+  {id:'PATH-P', name:'Sovereignty Restoration', param:'P', trigger:s=>s.P<0.40, threshold:0.40, direction:'below',
+   desc:'Restore autonomous decision-making capacity. External influence must be reduced.',
+   mechanism:'Influence source identification, decision boundary reinforcement, autonomy exercises'},
+  {id:'PATH-α', name:'Resolution Enhancement', param:'alpha', trigger:s=>s.alpha<0.30, threshold:0.30, direction:'below',
+   desc:'Improve knowledge-to-entropy gradient. System needs better signal processing.',
+   mechanism:'Noise reduction, knowledge base expansion, entropy source isolation'},
+  {id:'PATH-Ω', name:'Cooperation Recovery', param:'omega', trigger:s=>s.omega<0.40, threshold:0.40, direction:'below',
+   desc:'Rebuild cooperative capacity. System has become isolated or adversarial.',
+   mechanism:'Trust recalibration, collaborative framework restoration, shared-goal alignment'},
+  {id:'PATH-Ξ', name:'Efficiency Optimization', param:'xi', trigger:s=>s.xi<0.50, threshold:0.50, direction:'below',
+   desc:'Coherent efficiency below minimum. Output quality degrades despite adequate inputs.',
+   mechanism:'Processing pipeline audit, consistency-intelligence coupling, entropy management'},
+  {id:'PATH-Γ', name:'Resilience Building', param:'gamma', trigger:s=>s.gamma<0.40, threshold:0.40, direction:'below',
+   desc:'System cannot sustain coherence under stress. Structural reinforcement needed.',
+   mechanism:'Support network activation, entropy buffer expansion, kernel hardening'},
+  {id:'PATH-★', name:'Plenitude Restoration', param:'plen', trigger:s=>s.plen<0.75, threshold:0.75, direction:'below',
+   desc:'Epistemic humility has degraded. System shows overconfidence or false certainty.',
+   mechanism:'Uncertainty recalibration, confidence interval expansion, bias audit'},
+];
+
+function compute(){
+  const p={
+    P:+document.getElementById('sP').value/100,
+    alpha:+document.getElementById('sA').value/100,
+    omega:+document.getElementById('sO').value/100,
+    sigma:+document.getElementById('sS').value/100,
+    C:+document.getElementById('sC').value/100,
+    I:+document.getElementById('sI').value/100,
+    H:+document.getElementById('sH').value/100,
+    phi:+document.getElementById('sPhi').value/100,
+  };
+  const H=Math.max(p.H,0.01);
+  const xi=(p.C*p.I*p.P)/H;
+  const gamma=0.20+Math.min(xi,5)*Math.exp(-H*5*(1-p.phi));
+  const plen=Math.max(0,Math.min(1,0.5+Math.round(p.P*5)*0.15-Math.round(p.sigma*3)*0.35));
+  return {...p, xi, gamma:Math.min(gamma,2), plen};
+}
+
+function getMetricVal(state, param){
+  const map={sigma:'sigma',P:'P',alpha:'alpha',omega:'omega',xi:'xi',gamma:'gamma',plen:'plen'};
+  return state[map[param]]||0;
+}
+
+function renderPaths(){
+  const grid=document.getElementById('pathsGrid');
+  grid.innerHTML=PATHS.map(p=>`
+    <div class="path-card" id="pc_${p.id.replace('-','')}">
+      <div class="path-header">
+        <span class="path-id">${p.id}</span>
+        <span class="path-badge" id="badge_${p.id.replace('-','')}">—</span>
+      </div>
+      <div class="path-name">${p.name}</div>
+      <div class="path-trigger" id="trig_${p.id.replace('-','')}">Trigger: ${p.param} ${p.direction==='above'?'>':'<'} ${p.threshold}</div>
+      <div class="path-metric" id="met_${p.id.replace('-','')}"></div>
+      <div class="path-bar"><div class="path-bar-fill" id="bar_${p.id.replace('-','')}"></div></div>
+    </div>
+  `).join('');
+}
+
+function update(){
+  const s=compute();
+  ['P','A','O','S','C','I','H','Phi'].forEach(k=>{
+    const id='v'+k;
+    const sid='s'+k;
+    const map={P:'P',A:'alpha',O:'omega',S:'sigma',C:'C',I:'I',H:'H',Phi:'phi'};
+    document.getElementById(id).textContent=(+document.getElementById(sid).value/100).toFixed(2);
+  });
+
+  let triggered=0;
+  PATHS.forEach(p=>{
+    const val=getMetricVal(s,p.param);
+    const fire=p.trigger(s);
+    if(fire)triggered++;
+    const cid=p.id.replace('-','');
+    const card=document.getElementById('pc_'+cid);
+    card.className='path-card '+(fire?'triggered':'ok');
+    document.getElementById('badge_'+cid).textContent=fire?'TRIGGERED':'OK';
+    document.getElementById('met_'+cid).innerHTML=`Current: <b style="color:${fire?'#f04858':'#22ddaa'}">${val.toFixed(3)}</b> | Threshold: ${p.threshold}`;
+
+    const bar=document.getElementById('bar_'+cid);
+    let pct;
+    if(p.direction==='above'){pct=Math.min(val/3,1)*100;}
+    else{pct=Math.min(val/1,1)*100;}
+    bar.style.width=pct+'%';
+    bar.style.background=fire?'#f04858':'#22ddaa';
+  });
+
+  document.getElementById('trigCount').textContent=triggered;
+  document.getElementById('trigCount').style.color=triggered===0?'#22ddaa':triggered<=2?'#ee9930':'#f04858';
+
+  const active=PATHS.filter(p=>p.trigger(s)).map(p=>p.id);
+  document.getElementById('trigOrder').textContent=active.length>0?'Execute: '+active.join(' → '):'All paths clear — no recalibration needed';
+}
+
+renderPaths();
+update();
+</script>
+</body>
+</html>
