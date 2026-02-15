@@ -1,0 +1,63 @@
+# ══════════════════════════════════════════════════════
+# THE RECALIBRATION PROTOCOL — Docker Compose
+# Proyecto Estrella · Rafa — The Architect · CC BY-SA 4.0
+# ══════════════════════════════════════════════════════
+#
+# Usage:
+#   docker-compose up web         → Serve visualizations at http://localhost:8080
+#   docker-compose run engine     → Run interactive diagnostic
+#   docker-compose run test       → Run test suite
+#   docker-compose run batch      → Run batch processor demo
+
+version: "3.8"
+
+services:
+  # ── Visualization Server ──
+  # Serves all HTML dashboards, star map, poster, and interactive tools
+  web:
+    build: .
+    command: serve
+    ports:
+      - "${PORT:-8080}:8080"
+    environment:
+      - PORT=8080
+    restart: unless-stopped
+    labels:
+      - "project=recalibration-protocol"
+      - "author=Rafa — The Architect"
+      - "license=CC-BY-SA-4.0"
+
+  # ── Interactive Engine ──
+  # Run the diagnostic engine interactively
+  engine:
+    build: .
+    command: engine
+    stdin_open: true
+    tty: true
+    profiles:
+      - tools
+
+  # ── JSON Engine ──
+  # Pipe JSON input for programmatic use
+  engine-json:
+    build: .
+    command: engine --json
+    stdin_open: true
+    profiles:
+      - tools
+
+  # ── Test Suite ──
+  test:
+    build: .
+    command: test
+    profiles:
+      - ci
+
+  # ── Batch Processor ──
+  batch:
+    build: .
+    command: batch --demo
+    profiles:
+      - tools
+    volumes:
+      - ./reports:/protocol/reports
