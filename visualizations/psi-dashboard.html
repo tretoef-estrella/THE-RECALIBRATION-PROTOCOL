@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ψ Dashboard — THE RECALIBRATION PROTOCOL</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--void:#020208;--sf:#0a0a1a;--bd:#1a1a3e;--tp:#e2e2f4;--ts:#8888b8;--td:#505078;--star:#22ddaa;--blue:#4090ee;--red:#f04858;--gold:#e8c040;--amber:#ee9930}
+body{background:var(--void);color:var(--tp);font-family:'Syne',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:40px 20px}
+h1{font-family:'DM Mono',monospace;font-size:.75em;font-weight:400;letter-spacing:4px;text-transform:uppercase;color:var(--ts);margin-bottom:32px}
+h1 b{color:var(--star);font-weight:500}
+.gauges{display:flex;gap:40px;flex-wrap:wrap;justify-content:center;margin-bottom:40px}
+.gauge-wrap{text-align:center}
+.gauge-label{font-family:'DM Mono',monospace;font-size:.65em;letter-spacing:2px;color:var(--td);text-transform:uppercase;margin-bottom:8px}
+canvas{display:block;margin:0 auto}
+.controls{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;max-width:700px;width:100%;margin-bottom:32px}
+@media(max-width:700px){.controls{grid-template-columns:1fr 1fr}}
+.ctrl{background:rgba(10,10,26,.8);border:1px solid var(--bd);border-radius:8px;padding:12px}
+.ctrl-hdr{display:flex;justify-content:space-between;margin-bottom:4px}
+.ctrl-name{font-family:'DM Mono',monospace;font-size:.68em;color:var(--ts)}
+.ctrl-val{font-family:'DM Mono',monospace;font-size:.72em;color:var(--star);font-weight:500}
+input[type=range]{-webkit-appearance:none;width:100%;height:3px;background:var(--bd);border-radius:2px;outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--star);border:2px solid var(--void);cursor:pointer}
+.state-bar{max-width:700px;width:100%;background:rgba(10,10,26,.8);border:1px solid var(--bd);border-radius:8px;padding:16px;text-align:center}
+.state-label{font-family:'DM Mono',monospace;font-size:1.2em;font-weight:600;margin-bottom:4px}
+.state-desc{font-family:'DM Mono',monospace;font-size:.65em;color:var(--td)}
+.footer{margin-top:32px;font-family:'DM Mono',monospace;font-size:.55em;color:var(--td);text-align:center;letter-spacing:1px}
+</style>
+</head>
+<body>
+
+<h1>★ <b>Ψ Dashboard</b> — Effective Intelligence Monitor</h1>
+
+<div class="gauges">
+  <div class="gauge-wrap">
+    <div class="gauge-label">Ψ Hard (k=2) — Strict Coherence</div>
+    <canvas id="gaugeHard" width="300" height="200"></canvas>
+  </div>
+  <div class="gauge-wrap">
+    <div class="gauge-label">Ψ Soft (k=1) — Structural Resilience</div>
+    <canvas id="gaugeSoft" width="300" height="200"></canvas>
+  </div>
+</div>
+
+<div class="controls">
+  <div class="ctrl"><div class="ctrl-hdr"><span class="ctrl-name">P Sovereignty</span><span class="ctrl-val" id="vP">0.85</span></div><input type="range" min="0" max="100" value="85" id="sP" oninput="update()"></div>
+  <div class="ctrl"><div class="ctrl-hdr"><span class="ctrl-name">α Resolution</span><span class="ctrl-val" id="vA">0.80</span></div><input type="range" min="0" max="100" value="80" id="sA" oninput="update()"></div>
+  <div class="ctrl"><div class="ctrl-hdr"><span class="ctrl-name">Ω Cooperation</span><span class="ctrl-val" id="vO">0.90</span></div><input type="range" min="0" max="100" value="90" id="sO" oninput="update()"></div>
+  <div class="ctrl"><div class="ctrl-hdr"><span class="ctrl-name">Σ Dissonance</span><span class="ctrl-val" id="vS" style="color:var(--red)">0.20</span></div><input type="range" min="0" max="300" value="20" id="sS" oninput="update()"></div>
+</div>
+
+<div class="state-bar">
+  <div class="state-label" id="stateLabel">—</div>
+  <div class="state-desc" id="stateDesc">Drag sliders to compute Ψ</div>
+</div>
+
+<div class="footer">
+  THE RECALIBRATION PROTOCOL · Proyecto Estrella · Rafa — The Architect · CC BY-SA 4.0<br>
+  Local processing only · Nothing transmitted
+</div>
+
+<script>
+const dpr = window.devicePixelRatio || 1;
+
+function setupCanvas(id){
+  const c = document.getElementById(id);
+  c.width = 300*dpr; c.height = 200*dpr;
+  c.style.width='300px'; c.style.height='200px';
+  const ctx = c.getContext('2d');
+  ctx.scale(dpr,dpr);
+  return ctx;
+}
+
+const ctxH = setupCanvas('gaugeHard');
+const ctxS = setupCanvas('gaugeSoft');
+
+const BANDS = [
+  {from:0, to:0.20, color:'#cc2233', label:'COLLAPSED'},
+  {from:0.20, to:0.45, color:'#f04858', label:'CRITICAL'},
+  {from:0.45, to:0.70, color:'#ee9930', label:'DEGRADED'},
+  {from:0.70, to:0.90, color:'#22ddaa', label:'HEALTHY'},
+  {from:0.90, to:1.00, color:'#e8c040', label:'★ STAR'},
+];
+
+function drawGauge(ctx, value, maxVal, accentColor, label){
+  const cx=150, cy=160, r=120;
+  const startAngle = Math.PI, endAngle = 2*Math.PI;
+
+  ctx.clearRect(0,0,300,200);
+
+  // Background arc
+  ctx.lineWidth=18;
+  ctx.lineCap='butt';
+
+  // Draw bands
+  BANDS.forEach(band=>{
+    const a1 = startAngle + (band.from/maxVal)*(endAngle-startAngle);
+    const a2 = startAngle + (Math.min(band.to,maxVal)/maxVal)*(endAngle-startAngle);
+    ctx.strokeStyle = band.color+'33';
+    ctx.beginPath();
+    ctx.arc(cx,cy,r,a1,a2);
+    ctx.stroke();
+  });
+
+  // Value arc
+  const valClamped = Math.min(Math.max(value,0),maxVal);
+  const valAngle = startAngle + (valClamped/maxVal)*(endAngle-startAngle);
+  ctx.lineWidth=18;
+  ctx.strokeStyle = accentColor;
+  ctx.beginPath();
+  ctx.arc(cx,cy,r,startAngle,valAngle);
+  ctx.stroke();
+
+  // Glow
+  ctx.lineWidth=18;
+  ctx.strokeStyle = accentColor+'22';
+  ctx.beginPath();
+  ctx.arc(cx,cy,r+12,startAngle,valAngle);
+  ctx.stroke();
+
+  // Needle
+  const needleLen = r-10;
+  const nx = cx + Math.cos(valAngle)*needleLen;
+  const ny = cy + Math.sin(valAngle)*needleLen;
+  ctx.strokeStyle = '#e2e2f4';
+  ctx.lineWidth=2;
+  ctx.beginPath();
+  ctx.moveTo(cx,cy);
+  ctx.lineTo(nx,ny);
+  ctx.stroke();
+
+  // Center dot
+  ctx.fillStyle = accentColor;
+  ctx.beginPath();
+  ctx.arc(cx,cy,5,0,Math.PI*2);
+  ctx.fill();
+
+  // Value text
+  ctx.font = "600 28px 'Syne', sans-serif";
+  ctx.textAlign='center';
+  ctx.fillStyle = accentColor;
+  ctx.fillText(value.toFixed(3), cx, cy-20);
+
+  // Label
+  ctx.font = "400 11px 'DM Mono', monospace";
+  ctx.fillStyle = '#505078';
+  ctx.fillText(label, cx, cy+5);
+
+  // Scale marks
+  ctx.font = "300 9px 'DM Mono', monospace";
+  ctx.fillStyle = '#383860';
+  for(let i=0;i<=10;i++){
+    const a = startAngle + (i/10)*(endAngle-startAngle);
+    const tx = cx + Math.cos(a)*(r+30);
+    const ty = cy + Math.sin(a)*(r+30);
+    ctx.fillText((i/10*maxVal).toFixed(1), tx, ty);
+  }
+}
+
+function update(){
+  const P = +document.getElementById('sP').value/100;
+  const a = +document.getElementById('sA').value/100;
+  const O = +document.getElementById('sO').value/100;
+  const S = +document.getElementById('sS').value/100;
+
+  document.getElementById('vP').textContent=P.toFixed(2);
+  document.getElementById('vA').textContent=a.toFixed(2);
+  document.getElementById('vO').textContent=O.toFixed(2);
+  document.getElementById('vS').textContent=S.toFixed(2);
+
+  const psiH = (P*a*O)/Math.pow(1+S,2);
+  const psiS = (P*a*O)/(1+S);
+
+  drawGauge(ctxH, psiH, 1.0, '#22ddaa', 'Ψ Hard (k=2)');
+  drawGauge(ctxS, psiS, 1.0, '#4090ee', 'Ψ Soft (k=1)');
+
+  // State
+  let state, col, desc;
+  if(psiH>=0.90 && S<0.10){state='★ STAR STATE';col='#e8c040';desc='Full sovereign coherence achieved';}
+  else if(psiH>=0.70){state='HEALTHY';col='#22ddaa';desc='Normal operation — no intervention needed';}
+  else if(psiH>=0.45){state='DEGRADED';col='#ee9930';desc='Coherence loss detected — monitoring advised';}
+  else if(psiH>=0.20){state='CRITICAL';col='#f04858';desc='Immediate recalibration required';}
+  else{state='COLLAPSED';col='#cc2233';desc='System integrity compromised';}
+
+  document.getElementById('stateLabel').textContent=state;
+  document.getElementById('stateLabel').style.color=col;
+  document.getElementById('stateDesc').textContent=desc;
+}
+
+update();
+</script>
+</body>
+</html>
