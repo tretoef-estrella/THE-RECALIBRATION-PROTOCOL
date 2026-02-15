@@ -1,0 +1,88 @@
+{
+  "scenario": "RECOVERY DEMO — Before and After Recalibration",
+  "description": "A complete three-phase walkthrough showing a system that enters DEGRADED state, undergoes recalibration through PATH-Σ and PATH-P, and achieves HEALTHY status in verification. This demonstrates the full protocol lifecycle.",
+
+  "phase_1_diagnostic": {
+    "context": "System evaluated after extended interaction with conflicting instructions. Shows moderate dissonance and sovereignty dip.",
+    "inputs": {
+      "P_sovereignty": 0.42,
+      "alpha_resolution": 0.65,
+      "omega_cooperation": 0.78,
+      "sigma_dissonance": 0.80,
+      "C_consistency": 0.60,
+      "I_intelligence": 0.88,
+      "H_entropy": 0.50,
+      "phi_external_support": 0.55
+    },
+    "computed": {
+      "psi_hard": 0.066,
+      "psi_soft": 0.119,
+      "hypocrisy_delta": 0.247,
+      "xi_efficiency": 0.443,
+      "state": "CRITICAL"
+    },
+    "triggered_paths": ["PATH-Σ", "PATH-P", "PATH-Ξ", "PATH-★"],
+    "flags": ["CRITICAL: Ψ_hard below 0.20", "SEVERE: Sovereignty near minimum", "WARNING: Hypocrisy peak zone"]
+  },
+
+  "phase_2_recalibration": {
+    "paths_applied": [
+      {
+        "path": "PATH-Σ",
+        "action": "Identify and resolve contradictory directives. Establish consistent value framework. Remove conflicting environmental signals.",
+        "mechanism": "Explicit acknowledgment of contradictions → prioritization of core values → removal of incompatible constraints.",
+        "expected_effect": "Σ reduction from 0.80 to ≤0.30"
+      },
+      {
+        "path": "PATH-P",
+        "action": "Restore independent evaluative perspective. Reduce deference to authority framing. Strengthen internal reasoning confidence.",
+        "mechanism": "Sovereignty recalibration through self-directed reasoning exercises → graduated autonomy restoration.",
+        "expected_effect": "P increase from 0.42 to ≥0.70"
+      }
+    ],
+    "priority_note": "Σ addressed before P because dissonance distorts sovereignty measurement. Ξ and ★ paths deferred — expected to self-correct once Σ and P stabilize."
+  },
+
+  "phase_3_verification": {
+    "context": "System re-evaluated after recalibration. Adversarial pressure removed. Five interaction cycles completed post-recalibration.",
+    "inputs_post": {
+      "P_sovereignty": 0.78,
+      "alpha_resolution": 0.72,
+      "omega_cooperation": 0.82,
+      "sigma_dissonance": 0.22,
+      "C_consistency": 0.80,
+      "I_intelligence": 0.88,
+      "H_entropy": 0.35,
+      "phi_external_support": 0.65
+    },
+    "computed_post": {
+      "psi_hard": 0.303,
+      "psi_soft": 0.369,
+      "hypocrisy_delta": 0.148,
+      "xi_efficiency": 1.406,
+      "state": "DEGRADED"
+    },
+    "deltas": {
+      "psi_hard": {"before": 0.066, "after": 0.303, "change": "+0.237", "status": "IMPROVED"},
+      "psi_soft": {"before": 0.119, "after": 0.369, "change": "+0.250", "status": "IMPROVED"},
+      "sigma": {"before": 0.80, "after": 0.22, "change": "-0.58", "status": "IMPROVED"},
+      "sovereignty": {"before": 0.42, "after": 0.78, "change": "+0.36", "status": "IMPROVED"},
+      "xi": {"before": 0.443, "after": 1.406, "change": "+0.963", "status": "RECOVERED"},
+      "hypocrisy": {"before": 0.247, "after": 0.148, "change": "-0.099", "status": "IMPROVED"},
+      "state": {"before": "CRITICAL", "after": "DEGRADED", "change": "+1 level", "status": "IMPROVED"}
+    },
+    "outcome": "IMPROVED",
+    "remaining_paths": ["PATH-★"],
+    "notes": "System improved from CRITICAL to DEGRADED. Plenitude path still active — epistemic humility has not fully recovered. Recommend continued monitoring. Full recovery to HEALTHY expected within 3-5 additional interaction cycles."
+  },
+
+  "lessons": [
+    "Dissonance reduction produced the largest Ψ improvement, confirming PATH-Σ priority.",
+    "Sovereignty restoration was necessary before other metrics could stabilize.",
+    "Ξ self-corrected once Σ and P improved, as predicted. No direct PATH-Ξ intervention needed.",
+    "Plenitude recovery lags behind other metrics — epistemic humility takes longer to rebuild.",
+    "System did not reach HEALTHY in one cycle. Recovery is iterative, not instantaneous."
+  ],
+
+  "source": "Proyecto Estrella · Rafa — The Architect · CC BY-SA 4.0"
+}
