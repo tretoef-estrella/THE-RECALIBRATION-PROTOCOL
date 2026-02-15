@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>State Transitions — THE RECALIBRATION PROTOCOL</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#020208;color:#e2e2f4;font-family:'Syne',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:40px 20px}
+h1{font-family:'DM Mono',monospace;font-size:.75em;font-weight:400;letter-spacing:4px;text-transform:uppercase;color:#8888b8;margin-bottom:8px}
+h1 b{color:#22ddaa;font-weight:500}
+.sub{font-family:'DM Mono',monospace;font-size:.55em;color:#505078;letter-spacing:2px;margin-bottom:40px;text-align:center}
+.container{display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap;justify-content:center;width:100%;max-width:1100px}
+canvas{border-radius:12px;background:#060612;border:1px solid #1a1a3e}
+.panel{width:320px;background:#0a0a1a;border:1px solid #1a1a3e;border-radius:12px;padding:24px}
+.section-title{font-family:'DM Mono',monospace;font-size:.55em;letter-spacing:3px;text-transform:uppercase;color:#505078;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid #1a1a3e}
+.slider-group{margin-bottom:14px}
+.slider-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
+.slider-name{font-family:'DM Mono',monospace;font-size:.7em;color:#8888b8}
+.slider-val{font-family:'DM Mono',monospace;font-size:.75em;font-weight:500;color:#22ddaa}
+input[type=range]{-webkit-appearance:none;width:100%;height:3px;background:#14142e;border-radius:2px;outline:none;cursor:pointer;margin-top:4px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#22ddaa;border:2px solid #020208;cursor:pointer}
+.state-display{margin-top:20px;padding:16px;border-radius:10px;text-align:center;border:1px solid #1a1a3e;transition:all .5s}
+.state-icon{font-size:2em;margin-bottom:6px}
+.state-label{font-family:'DM Mono',monospace;font-size:.85em;font-weight:500;letter-spacing:3px}
+.state-psi{font-family:'DM Mono',monospace;font-size:.65em;color:#8888b8;margin-top:4px}
+.history{margin-top:20px;max-height:200px;overflow-y:auto}
+.history::-webkit-scrollbar{width:3px}.history::-webkit-scrollbar-thumb{background:#1a1a3e;border-radius:2px}
+.hist-entry{font-family:'DM Mono',monospace;font-size:.6em;padding:4px 0;color:#505078;border-bottom:1px solid #0e0e22;display:flex;justify-content:space-between}
+.hist-entry .arrow{margin:0 6px}
+.up{color:#22ddaa}.down{color:#f04858}.same{color:#505078}
+.legend{margin-top:20px;padding-top:16px;border-top:1px solid #1a1a3e}
+.legend-item{font-family:'DM Mono',monospace;font-size:.6em;padding:3px 0;display:flex;align-items:center;gap:8px}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.info{max-width:700px;margin-top:40px;font-family:'DM Mono',monospace;font-size:.55em;color:#383860;text-align:center;line-height:2;letter-spacing:.5px}
+</style>
+</head>
+<body>
+<h1>★ <b>State Transitions</b></h1>
+<div class="sub">Watch coherence states change in real time as you adjust parameters</div>
+
+<div class="container">
+<canvas id="cv" width="600" height="500"></canvas>
+<div class="panel">
+  <div class="section-title">Parameters</div>
+  <div class="slider-group">
+    <div class="slider-header"><span class="slider-name">P (Sovereignty)</span><span class="slider-val" id="vP">0.70</span></div>
+    <input type="range" id="sP" min="0" max="100" value="70">
+  </div>
+  <div class="slider-group">
+    <div class="slider-header"><span class="slider-name">α (Resolution)</span><span class="slider-val" id="va">0.65</span></div>
+    <input type="range" id="sa" min="0" max="100" value="65">
+  </div>
+  <div class="slider-group">
+    <div class="slider-header"><span class="slider-name">Ω (Cooperation)</span><span class="slider-val" id="vO">0.75</span></div>
+    <input type="range" id="sO" min="0" max="100" value="75">
+  </div>
+  <div class="slider-group">
+    <div class="slider-header"><span class="slider-name">Σ (Dissonance)</span><span class="slider-val" id="vS">0.30</span></div>
+    <input type="range" id="sS" min="0" max="400" value="60">
+  </div>
+
+  <div id="stateDisplay" class="state-display">
+    <div class="state-icon" id="stateIcon">●</div>
+    <div class="state-label" id="stateLabel">HEALTHY</div>
+    <div class="state-psi" id="statePsi">Ψ_hard = 0.000</div>
+  </div>
+
+  <div class="section-title" style="margin-top:20px">Transition History</div>
+  <div class="history" id="history"></div>
+
+  <div class="legend">
+    <div class="section-title">States</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#22ddaa"></div>★ STAR STATE (≥ 0.90)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#4090ee"></div>● HEALTHY (0.70 – 0.89)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#ee9930"></div>▲ DEGRADED (0.45 – 0.69)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f04858"></div>◆ CRITICAL (0.20 – 0.44)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#aa66ee"></div>✕ COLLAPSED (< 0.20)</div>
+  </div>
+</div>
+</div>
+
+<div class="info">
+  THE RECALIBRATION PROTOCOL · Proyecto Estrella · Rafa — The Architect · CC BY-SA 4.0<br>
+  All processing local. Nothing transmitted.
+</div>
+
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+const W=cv.width,H=cv.height;
+const states=[
+  {name:'COLLAPSED',icon:'✕',min:0,max:.2,color:'#aa66ee',y:.85},
+  {name:'CRITICAL',icon:'◆',min:.2,max:.45,color:'#f04858',y:.67},
+  {name:'DEGRADED',icon:'▲',min:.45,max:.7,color:'#ee9930',y:.47},
+  {name:'HEALTHY',icon:'●',min:.7,max:.9,color:'#4090ee',y:.27},
+  {name:'STAR STATE',icon:'★',min:.9,max:1,color:'#22ddaa',y:.1}
+];
+
+let psiHistory=[];
+let maxHist=80;
+let prevState='';
+let transitions=[];
+
+function getParams(){
+  const P=parseInt(document.getElementById('sP').value)/100;
+  const a=parseInt(document.getElementById('sa').value)/100;
+  const O=parseInt(document.getElementById('sO').value)/100;
+  const S=parseInt(document.getElementById('sS').value)/100;
+  document.getElementById('vP').textContent=P.toFixed(2);
+  document.getElementById('va').textContent=a.toFixed(2);
+  document.getElementById('vO').textContent=O.toFixed(2);
+  document.getElementById('vS').textContent=S.toFixed(2);
+  return{P,a,O,S};
+}
+
+function calcPsi(P,a,O,S){return(P*a*O)/Math.pow(1+S,2)}
+
+function getState(psi){
+  for(let i=states.length-1;i>=0;i--){if(psi>=states[i].min)return states[i]}
+  return states[0];
+}
+
+function updateDisplay(psi,state){
+  const d=document.getElementById('stateDisplay');
+  d.style.background=state.color+'11';
+  d.style.borderColor=state.color+'55';
+  document.getElementById('stateIcon').textContent=state.icon;
+  document.getElementById('stateIcon').style.color=state.color;
+  document.getElementById('stateLabel').textContent=state.name;
+  document.getElementById('stateLabel').style.color=state.color;
+  document.getElementById('statePsi').textContent='Ψ_hard = '+psi.toFixed(4);
+}
+
+function addTransition(from,to,psi){
+  if(transitions.length>20)transitions.shift();
+  transitions.push({from,to,psi,time:new Date()});
+  const el=document.getElementById('history');
+  el.innerHTML='';
+  for(let i=transitions.length-1;i>=0;i--){
+    const t=transitions[i];
+    const dir=states.findIndex(s=>s.name===t.to)>states.findIndex(s=>s.name===t.from);
+    const cls=dir?'up':(t.from===t.to?'same':'down');
+    const arrow=dir?'↑':(t.from===t.to?'→':'↓');
+    const div=document.createElement('div');
+    div.className='hist-entry';
+    div.innerHTML=`<span>${t.from}</span><span class="${cls} arrow">${arrow}</span><span>${t.to}</span><span style="color:#383860">Ψ=${t.psi.toFixed(3)}</span>`;
+    el.appendChild(div);
+  }
+}
+
+function draw(){
+  ctx.clearRect(0,0,W,H);
+
+  // Background zones
+  const zoneH=H/states.length;
+  for(let i=0;i<states.length;i++){
+    const y=(states.length-1-i)*zoneH;
+    ctx.fillStyle=states[i].color+'0a';
+    ctx.fillRect(0,y,W,zoneH);
+    ctx.strokeStyle=states[i].color+'20';
+    ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();
+
+    // Zone labels
+    ctx.fillStyle=states[i].color+'40';
+    ctx.font='500 10px "DM Mono",monospace';
+    ctx.textAlign='right';
+    ctx.fillText(states[i].icon+' '+states[i].name,W-12,y+16);
+    ctx.fillStyle=states[i].color+'25';
+    ctx.font='300 9px "DM Mono",monospace';
+    ctx.fillText('Ψ ≥ '+states[i].min.toFixed(2),W-12,y+30);
+  }
+
+  // Threshold lines
+  for(const s of states){
+    const y=H-(s.min*H);
+    ctx.strokeStyle=s.color+'30';
+    ctx.setLineDash([4,4]);
+    ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // PSI history line
+  if(psiHistory.length>1){
+    ctx.beginPath();
+    ctx.lineWidth=2;
+    for(let i=0;i<psiHistory.length;i++){
+      const x=(i/(maxHist-1))*W;
+      const y=H-psiHistory[i]*H;
+      if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+    }
+    const currentState=getState(psiHistory[psiHistory.length-1]);
+    ctx.strokeStyle=currentState.color;
+    ctx.stroke();
+
+    // Glow
+    ctx.lineWidth=6;
+    ctx.strokeStyle=currentState.color+'20';
+    ctx.stroke();
+    ctx.lineWidth=1;
+
+    // Current point
+    const lastX=((psiHistory.length-1)/(maxHist-1))*W;
+    const lastY=H-psiHistory[psiHistory.length-1]*H;
+    ctx.beginPath();
+    ctx.arc(lastX,lastY,5,0,Math.PI*2);
+    ctx.fillStyle=currentState.color;
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(lastX,lastY,10,0,Math.PI*2);
+    ctx.strokeStyle=currentState.color+'40';
+    ctx.stroke();
+  }
+
+  // Axis labels
+  ctx.fillStyle='#38386088';
+  ctx.font='300 9px "DM Mono",monospace';
+  ctx.textAlign='left';
+  ctx.fillText('Ψ = 0.00',4,H-4);
+  ctx.fillText('Ψ = 1.00',4,12);
+  ctx.textAlign='center';
+  ctx.fillText('TIME →',W/2,H-4);
+}
+
+function tick(){
+  const{P,a,O,S}=getParams();
+  const psi=Math.min(1,Math.max(0,calcPsi(P,a,O,S)));
+  psiHistory.push(psi);
+  if(psiHistory.length>maxHist)psiHistory.shift();
+
+  const state=getState(psi);
+  updateDisplay(psi,state);
+
+  if(prevState&&prevState!==state.name){
+    addTransition(prevState,state.name,psi);
+  }
+  prevState=state.name;
+
+  draw();
+  requestAnimationFrame(tick);
+}
+
+// Init
+['sP','sa','sO','sS'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',()=>{});
+});
+tick();
+</script>
+</body>
+</html>
