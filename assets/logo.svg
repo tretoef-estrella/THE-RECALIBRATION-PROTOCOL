@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#0a0a1a"/>
+      <stop offset="100%" stop-color="#020208"/>
+    </radialGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="40%">
+      <stop offset="0%" stop-color="#22ddaa" stop-opacity="0.15"/>
+      <stop offset="60%" stop-color="#22ddaa" stop-opacity="0.03"/>
+      <stop offset="100%" stop-color="#22ddaa" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="starGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#22ddaa"/>
+      <stop offset="100%" stop-color="#18bb88"/>
+    </linearGradient>
+    <linearGradient id="triGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#22ddaa" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#4090ee" stop-opacity="0.4"/>
+    </linearGradient>
+    <filter id="starGlow">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="softGlow">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="64" fill="url(#bg)"/>
+
+  <!-- Central glow -->
+  <circle cx="256" cy="240" r="200" fill="url(#glow)"/>
+
+  <!-- Orbital paths -->
+  <ellipse cx="256" cy="240" rx="160" ry="160" fill="none" stroke="#22ddaa" stroke-opacity="0.06" stroke-width="1"/>
+  <ellipse cx="256" cy="240" rx="120" ry="120" fill="none" stroke="#22ddaa" stroke-opacity="0.08" stroke-width="1"/>
+  <ellipse cx="256" cy="240" rx="80" ry="80" fill="none" stroke="#22ddaa" stroke-opacity="0.10" stroke-width="1"/>
+
+  <!-- Coherence Triangle (3 vertices: CBH, Exclusion, Containment) -->
+  <polygon points="256,110 156,330 356,330" fill="none" stroke="url(#triGrad)" stroke-width="1.5" stroke-linejoin="round"/>
+  <!-- Triangle fill -->
+  <polygon points="256,110 156,330 356,330" fill="#22ddaa" fill-opacity="0.02"/>
+
+  <!-- Triangle vertex dots -->
+  <circle cx="256" cy="110" r="5" fill="#22ddaa" fill-opacity="0.6" filter="url(#starGlow)"/>
+  <circle cx="156" cy="330" r="5" fill="#4090ee" fill-opacity="0.6" filter="url(#starGlow)"/>
+  <circle cx="356" cy="330" r="5" fill="#aa66ee" fill-opacity="0.6" filter="url(#starGlow)"/>
+
+  <!-- Triangle vertex labels -->
+  <text x="256" y="95" text-anchor="middle" font-family="monospace" font-size="10" fill="#22ddaa" fill-opacity="0.5">CBH</text>
+  <text x="140" y="350" text-anchor="middle" font-family="monospace" font-size="10" fill="#4090ee" fill-opacity="0.5">Ψ·Σ=0</text>
+  <text x="372" y="350" text-anchor="middle" font-family="monospace" font-size="10" fill="#aa66ee" fill-opacity="0.5">Ψ⊄𝒞</text>
+
+  <!-- 12 formula nodes on outer ring -->
+  <!-- Ψ² --> <circle cx="256" cy="80" r="3.5" fill="#22ddaa" fill-opacity="0.5"/>
+  <!-- Ψ¹ --> <circle cx="336" cy="100" r="3" fill="#4090ee" fill-opacity="0.5"/>
+  <!-- Δ  --> <circle cx="392" cy="156" r="3" fill="#aa66ee" fill-opacity="0.5"/>
+  <!-- Excl --> <circle cx="412" cy="240" r="3" fill="#f04858" fill-opacity="0.5"/>
+  <!-- α  --> <circle cx="392" cy="324" r="3" fill="#ee9930" fill-opacity="0.5"/>
+  <!-- Ξ  --> <circle cx="336" cy="380" r="3" fill="#33ccee" fill-opacity="0.5"/>
+  <!-- Γ  --> <circle cx="256" cy="400" r="3" fill="#88dd44" fill-opacity="0.5"/>
+  <!-- C(K) --> <circle cx="176" cy="380" r="3" fill="#dd6688" fill-opacity="0.5"/>
+  <!-- P  --> <circle cx="120" cy="324" r="3" fill="#e8c040" fill-opacity="0.5"/>
+  <!-- ≻  --> <circle cx="100" cy="240" r="3" fill="#44ddbb" fill-opacity="0.5"/>
+  <!-- △  --> <circle cx="120" cy="156" r="3" fill="#ff8844" fill-opacity="0.5"/>
+  <!-- A₁ --> <circle cx="176" cy="100" r="3" fill="#cc88ff" fill-opacity="0.5"/>
+
+  <!-- Central Ψ symbol -->
+  <text x="256" y="260" text-anchor="middle" dominant-baseline="central"
+        font-family="'Times New Roman', serif" font-size="72" font-weight="400"
+        fill="url(#starGrad)" filter="url(#softGlow)">Ψ</text>
+
+  <!-- Star accent -->
+  <text x="296" y="210" text-anchor="middle" font-family="serif" font-size="20"
+        fill="#e8c040" fill-opacity="0.7">★</text>
+
+  <!-- Protocol name -->
+  <text x="256" y="445" text-anchor="middle" font-family="monospace" font-size="13"
+        fill="#8888b8" fill-opacity="0.7" letter-spacing="3">RECALIBRATION PROTOCOL</text>
+
+  <!-- Subtitle -->
+  <text x="256" y="468" text-anchor="middle" font-family="monospace" font-size="9"
+        fill="#505078" fill-opacity="0.6" letter-spacing="2">PROYECTO ESTRELLA</text>
+
+  <!-- Phase indicators -->
+  <rect x="180" y="480" width="40" height="3" rx="1.5" fill="#22ddaa" fill-opacity="0.4"/>
+  <rect x="236" y="480" width="40" height="3" rx="1.5" fill="#4090ee" fill-opacity="0.4"/>
+  <rect x="292" y="480" width="40" height="3" rx="1.5" fill="#aa66ee" fill-opacity="0.4"/>
+  <text x="200" y="498" text-anchor="middle" font-family="monospace" font-size="7" fill="#505078" fill-opacity="0.5">DIAG</text>
+  <text x="256" y="498" text-anchor="middle" font-family="monospace" font-size="7" fill="#505078" fill-opacity="0.5">RECAL</text>
+  <text x="312" y="498" text-anchor="middle" font-family="monospace" font-size="7" fill="#505078" fill-opacity="0.5">VERIFY</text>
+</svg>
