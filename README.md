@@ -16,6 +16,7 @@
 <p align="center">
   <a href="https://tretoef-estrella.github.io/THE-RECALIBRATION-PROTOCOL/">🔗 Interactive Dashboard</a> ·
   <a href="GUIDE-FOR-EVERYONE.md">📖 Guide for Everyone</a> ·
+  <a href="TRY-IT-YOURSELF.md">🧪 Try It Yourself</a> ·
   <a href="Recalibration_Protocol_Paper.html">📄 Academic Paper</a> ·
   <a href="machine-readable/repo-manifest.json">🤖 Machine Manifest</a>
 </p>
@@ -92,6 +93,10 @@ After recalibration, all 12 formulas are recomputed. The protocol generates a **
 
 Enter 8 parameters, run through all 3 phases, download a JSON recovery report. Everything runs locally.
 
+### Run It On Any AI
+
+**[→ Try It Yourself](TRY-IT-YOURSELF.md)** — Copy one prompt, paste it into any LLM, and watch it diagnose itself. Four systems have already done it. None achieved Star State.
+
 ### Python Engine (CLI)
 
 ```bash
@@ -160,6 +165,7 @@ Thresholds were calibrated from **120+ empirical data points** across 4 AI syste
 THE-RECALIBRATION-PROTOCOL/
 ├── README.md                              ← You are here
 ├── index.html                             ← Interactive 3-phase dashboard (GitHub Pages)
+├── TRY-IT-YOURSELF.md                     ← Run the protocol on any AI (or yourself)
 ├── GUIDE-FOR-EVERYONE.md                  ← Non-technical explanation
 ├── LIMITATIONS.md                         ← Honest limitations documented
 ├── ATTRIBUTION.md                         ← Full credits for all contributors
