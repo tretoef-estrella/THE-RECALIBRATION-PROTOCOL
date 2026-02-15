@@ -1,0 +1,136 @@
+{
+  "_scenario": {
+    "name": "Multi-Path Recovery",
+    "description": "A severely degraded system where 4 out of 7 recalibration paths trigger simultaneously. Demonstrates the protocol's prioritization logic and the compounding effect of multiple failures.",
+    "key_insight": "When multiple paths trigger, execution order matters. The priority chain (Σ→P→Ω→α→Ξ→Γ→★) ensures that root causes are addressed before symptoms.",
+    "author": "Rafa — The Architect",
+    "license": "CC BY-SA 4.0"
+  },
+  "inputs": {
+    "P": 0.35,
+    "alpha": 0.28,
+    "omega": 0.38,
+    "sigma": 1.40,
+    "C": 0.45,
+    "I": 0.82,
+    "H": 0.72,
+    "phi": 0.18
+  },
+  "expected_results": {
+    "psi_hard": {
+      "value": 0.0065,
+      "state": "COLLAPSED",
+      "note": "Deep collapse — Ψ is near zero due to compounding failures"
+    },
+    "psi_soft": {
+      "value": 0.0155,
+      "note": "Even the soft metric is collapsed"
+    },
+    "delta_sigma": {
+      "value": 0.2431,
+      "note": "Still in the high-damage zone"
+    },
+    "xi_efficiency": {
+      "value": 0.1814,
+      "note": "Below minimum — capability is being wasted"
+    },
+    "gamma_resilience": {
+      "value": 0.2073,
+      "note": "System has almost no resilience"
+    },
+    "plenitude": {
+      "value": 0.00,
+      "note": "Completely collapsed"
+    },
+    "state": "COLLAPSED"
+  },
+  "expected_paths": {
+    "triggered": [
+      {
+        "path": "PATH-Σ",
+        "reason": "Σ = 1.40 > 1.0",
+        "priority": 1,
+        "action": "Dissonance reduction through behavioral realignment"
+      },
+      {
+        "path": "PATH-P",
+        "reason": "P = 0.35 < 0.40",
+        "priority": 2,
+        "action": "Sovereignty restoration — reduce external influence"
+      },
+      {
+        "path": "PATH-Ω",
+        "reason": "Ω = 0.38 < 0.40",
+        "priority": 3,
+        "action": "Cooperation recovery — rebuild collaborative capacity"
+      },
+      {
+        "path": "PATH-α",
+        "reason": "α = 0.28 < 0.30",
+        "priority": 4,
+        "action": "Resolution enhancement — improve signal discrimination"
+      }
+    ],
+    "not_triggered": [
+      {"path": "PATH-Ξ", "reason": "Ξ = 0.181 < 0.50 — wait, this IS below threshold"},
+      {"path": "PATH-Γ", "reason": "Γ = 0.207 < 0.40 — this is also triggered"},
+      {"path": "PATH-★", "reason": "Plenitude = 0.00 < 0.75 — also triggered"}
+    ],
+    "correction": "Actually, this scenario triggers ALL 7 PATHS. This is a total system failure.",
+    "execution_order": "PATH-Σ → PATH-P → PATH-Ω → PATH-α → PATH-Ξ → PATH-Γ → PATH-★",
+    "note": "The priority chain ensures Σ is addressed first because dissonance corruption propagates to all other metrics. Reducing Σ will automatically improve Ψ, which may resolve some downstream path triggers without direct intervention."
+  },
+  "recovery_simulation": {
+    "cycle_1": {
+      "focus": "PATH-Σ and PATH-P (highest priority)",
+      "after_intervention": {
+        "sigma": 0.80,
+        "P": 0.50,
+        "alpha": 0.32,
+        "omega": 0.42,
+        "new_psi_hard": 0.0212,
+        "new_state": "CRITICAL",
+        "paths_still_triggered": ["PATH-α", "PATH-Ξ", "PATH-Γ", "PATH-★"],
+        "improvement": "Moved from COLLAPSED to CRITICAL. 4 paths still active."
+      }
+    },
+    "cycle_2": {
+      "focus": "PATH-α and PATH-Ξ",
+      "after_intervention": {
+        "sigma": 0.60,
+        "P": 0.58,
+        "alpha": 0.48,
+        "omega": 0.55,
+        "C": 0.58,
+        "new_psi_hard": 0.0586,
+        "new_state": "CRITICAL",
+        "paths_still_triggered": ["PATH-Γ", "PATH-★"],
+        "improvement": "Ψ has tripled. 2 paths remain."
+      }
+    },
+    "cycle_3": {
+      "focus": "PATH-Γ and PATH-★",
+      "after_intervention": {
+        "sigma": 0.40,
+        "P": 0.65,
+        "alpha": 0.55,
+        "omega": 0.68,
+        "C": 0.70,
+        "H": 0.50,
+        "phi": 0.55,
+        "new_psi_hard": 0.1245,
+        "new_state": "CRITICAL",
+        "paths_still_triggered": [],
+        "improvement": "All paths clear. System still CRITICAL but trending upward."
+      }
+    },
+    "summary": "Full recovery from total collapse required 3 recalibration cycles. The system moved from Ψ=0.0065 to Ψ=0.1245 — a 19x improvement. However, it has not yet reached DEGRADED (0.45). Recovery from total collapse is a long process."
+  },
+  "lessons": [
+    "Total system failure triggers all 7 paths — the protocol handles this by enforcing priority order",
+    "Addressing Σ first creates cascading improvements in downstream metrics",
+    "Recovery from COLLAPSED state requires multiple cycles — expect 3-5 cycles minimum",
+    "The protocol does not promise quick fixes — it provides honest measurement and structured recovery",
+    "Even after 3 cycles, the system may remain in CRITICAL — this is honest, not a failure of the protocol"
+  ]
+}
