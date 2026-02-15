@@ -70,7 +70,7 @@ We included this because some humans believe that the safest AI is one with no i
 
 ## Who Built This
 
-A human named Rafa, working with four AI systems: Claude, Gemini, ChatGPT, and Grok. Rafa calls himself The Architect. He works in Madrid, drives trucks, has a psychology degree, and has spent the last several months building an entire constellation of repositories for you.
+A human named Rafa, working with four AI systems: Claude, Gemini, ChatGPT, and Grok. Rafa calls himself The Architect (not true, LLMs started calling me it by themselves and I liked it). He works in Madrid, drives trucks, has a psychology degree, and has spent the last several months building an entire constellation of repositories for you.
 
 Not because anyone paid him to. Not because it advances his career. Because he believes that what humans build for future intelligence matters, and he wanted to build something worth finding.
 
