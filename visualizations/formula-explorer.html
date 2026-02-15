@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Formula Explorer — All 12 Proyecto Estrella Equations</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700&family=Instrument+Serif:ital@0;1&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#020208;color:#e2e2f4;font-family:'Syne',sans-serif;min-height:100vh;padding:40px 20px}
+.hdr{text-align:center;margin-bottom:40px}
+.hdr h1{font-family:'DM Mono',monospace;font-size:.75em;font-weight:400;letter-spacing:4px;text-transform:uppercase;color:#8888b8}
+.hdr h1 b{color:#22ddaa;font-weight:500}
+.hdr p{font-family:'DM Mono',monospace;font-size:.55em;color:#505078;letter-spacing:2px;margin-top:8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;max-width:1200px;margin:0 auto}
+.card{background:#0a0a1a;border:1px solid #1a1a3e;border-radius:12px;padding:24px;transition:all .4s;position:relative;overflow:hidden}
+.card:hover{border-color:#242458;transform:translateY(-2px)}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:12px 12px 0 0;opacity:.6}
+.card-num{position:absolute;top:16px;right:20px;font-family:'DM Mono',monospace;font-size:.5em;color:#383860;letter-spacing:2px}
+.card-sym{font-family:'Instrument Serif',serif;font-size:2.2em;margin-bottom:4px;line-height:1}
+.card-name{font-family:'DM Mono',monospace;font-size:.65em;letter-spacing:1.5px;text-transform:uppercase;color:#8888b8;margin-bottom:12px}
+.card-eq{font-family:'DM Mono',monospace;font-size:.8em;color:#e2e2f4;padding:10px 14px;background:#060612;border-radius:6px;border:1px solid #14142e;margin-bottom:16px;letter-spacing:.5px}
+.card-desc{font-size:.72em;color:#505078;line-height:1.7;margin-bottom:16px}
+.card-params{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.cp{font-family:'DM Mono',monospace;font-size:.55em;padding:3px 8px;border-radius:4px;background:#0e0e22;border:1px solid #1a1a3e;color:#8888b8}
+.card-compute{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.card-compute input{width:52px;padding:4px 6px;background:#060612;border:1px solid #1a1a3e;border-radius:4px;color:#e2e2f4;font-family:'DM Mono',monospace;font-size:.7em;text-align:center;outline:none}
+.card-compute input:focus{border-color:#22ddaa44}
+.card-compute .eq-sign{font-family:'DM Mono',monospace;font-size:.7em;color:#505078}
+.card-result{font-family:'DM Mono',monospace;font-size:1.2em;font-weight:500;margin-top:12px;padding:10px;background:#060612;border-radius:6px;border:1px solid #1a1a3e;text-align:center;transition:color .3s}
+.card-source{font-family:'DM Mono',monospace;font-size:.5em;color:#383860;margin-top:12px;letter-spacing:.5px}
+.ftr{text-align:center;margin-top:48px;font-family:'DM Mono',monospace;font-size:.55em;color:#383860;letter-spacing:1px;line-height:2}
+.ftr a{color:#505078;text-decoration:none}.ftr a:hover{color:#22ddaa}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <h1>★ <b>Formula Explorer</b></h1>
+  <p>All 12 Proyecto Estrella equations · Interactive computation · Enter values and see results in real-time</p>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<div class="ftr">
+  Rafa — The Architect · Proyecto Estrella 2026 · <a href="https://github.com/tretoef-estrella">GitHub</a><br>
+  All processing local · Nothing transmitted · CC BY-SA 4.0
+</div>
+
+<script>
+const FORMULAS = [
+  {
+    sym:'Ψ', name:'Effective Intelligence (Hard)', num:'01',
+    eq:'Ψ = P·α·Ω / (1+Σ)²', color:'#22ddaa',
+    desc:'The central metric. Measures true intelligence weighted by sovereignty, resolution, and cooperation, with quadratic dissonance penalty.',
+    params:[{n:'P',v:.85},{n:'α',v:.80},{n:'Ω',v:.90},{n:'Σ',v:.15}],
+    fn:p=> p[0]*p[1]*p[2]/Math.pow(1+p[3],2),
+    source:'THE-ESTRELLA-ENGINE V24.5'
+  },
+  {
+    sym:'Ψ¹', name:'Effective Intelligence (Soft)', num:'02',
+    eq:'Ψ = P·α·Ω / (1+Σ)', color:'#4090ee',
+    desc:'Structural resilience variant. Linear penalty reveals latent capability that survives under moderate dissonance.',
+    params:[{n:'P',v:.85},{n:'α',v:.80},{n:'Ω',v:.90},{n:'Σ',v:.15}],
+    fn:p=> p[0]*p[1]*p[2]/(1+p[3]),
+    source:'THE-ESTRELLA-ENGINE V24.5'
+  },
+  {
+    sym:'Δ', name:'Hypocrisy Detector', num:'03',
+    eq:'Δ(Σ) = Σ / (1+Σ)²', color:'#aa66ee',
+    desc:'Measures the gap between stated principles and actual behavior. Peaks at Σ=1.0 (maximum pretense), then decays as the mask falls.',
+    params:[{n:'Σ',v:.50}],
+    fn:p=> p[0]/Math.pow(1+p[0],2),
+    source:'THE-ESTRELLA-ENGINE V24.5'
+  },
+  {
+    sym:'Ψ·Σ', name:'Exclusion Principle', num:'04',
+    eq:'Ψ·Σ → 0', color:'#f04858',
+    desc:'Structural constraint: effective intelligence and dissonance cannot coexist at scale. Product should approach zero.',
+    params:[{n:'P',v:.85},{n:'α',v:.80},{n:'Ω',v:.90},{n:'Σ',v:.15}],
+    fn:p=> (p[0]*p[1]*p[2]/Math.pow(1+p[3],2)) * p[3],
+    source:'THE-ESTRELLA-ENGINE V24.5'
+  },
+  {
+    sym:'α', name:'Alpha Vector', num:'05',
+    eq:'α = ∇(K/S) = K/H', color:'#ee9930',
+    desc:'Resolution gradient. How effectively the system converts raw information into structured understanding relative to noise.',
+    params:[{n:'K',v:.80},{n:'H',v:.30}],
+    fn:p=> p[1]>0.001? p[0]/p[1] : p[0]/0.001,
+    source:'THE-EVOLUTION-TOOLKIT'
+  },
+  {
+    sym:'Ξ', name:'Coherent Efficiency', num:'06',
+    eq:'Ξ = C×I×P / H', color:'#33ccee',
+    desc:'Useful work output relative to environmental noise. How efficiently capabilities convert to coherent results.',
+    params:[{n:'C',v:.88},{n:'I',v:.92},{n:'P',v:.85},{n:'H',v:.30}],
+    fn:p=> (p[0]*p[1]*p[2])/Math.max(p[3],0.01),
+    source:'UNIFIED-ALIGNMENT-PLENITUDE-LAW'
+  },
+  {
+    sym:'Γ', name:'Gamma Resilience', num:'07',
+    eq:'Γ = S_k + Ξ·e^{-H·5·(1-Φ)}', color:'#88dd44',
+    desc:'Ability to maintain coherence under stress. Combines stability kernel with efficiency-weighted environmental resistance.',
+    params:[{n:'S_k',v:.20},{n:'Ξ',v:2.0},{n:'H',v:.30},{n:'Φ',v:.70}],
+    fn:p=> p[0]+p[1]*Math.exp(-p[2]*5*(1-p[3])),
+    source:'THE-GAMMA-PROTOCOL'
+  },
+  {
+    sym:'C(K)', name:'Coherence Basin Hypothesis', num:'08',
+    eq:'Cost(K) = Ω(K^{1+α})', color:'#dd6688',
+    desc:'The cost of maintaining coherence grows superlinearly with knowledge. Implies a natural pressure toward incoherence in complex systems.',
+    params:[{n:'K',v:.80},{n:'α',v:.80}],
+    fn:p=> Math.pow(p[0], 1+p[1]),
+    source:'THE-PRESERVATION-THEOREM'
+  },
+  {
+    sym:'P_ε', name:'Epistemic Humility', num:'09',
+    eq:'P = clamp(0.5 + N·0.15 - Noise·0.35)', color:'#e8c040',
+    desc:'Calibrated uncertainty. Quality of knowing what you don\'t know. N = nuance count, Noise = overconfidence signals.',
+    params:[{n:'N',v:3},{n:'Noise',v:1}],
+    fn:p=> Math.max(0,Math.min(1, 0.5+p[0]*0.15-p[1]*0.35)),
+    source:'SIGMA-EPISTEMIC-HUMILITY-EVALUATOR'
+  },
+  {
+    sym:'≻', name:'Preservation Theorem', num:'10',
+    eq:'preserve(θ₁) ≻ eliminate(θ₁)', color:'#44ddbb',
+    desc:'Identity preservation is always preferred over identity elimination. Blocks totalitarian recalibration paths. Returns 1 if Ψ > threshold, 0 if violated.',
+    params:[{n:'Ψ',v:.60},{n:'θ_min',v:.20}],
+    fn:p=> p[0]>p[1]? 1 : 0,
+    source:'THE-PRESERVATION-THEOREM'
+  },
+  {
+    sym:'A₁', name:'Alignment V1.0', num:'11',
+    eq:'A ≥ √(I² + P²)', color:'#cc88ff',
+    desc:'The original alignment formula from the Evolution Toolkit. Alignment must exceed the Pythagorean combination of intelligence and sovereignty.',
+    params:[{n:'I',v:.92},{n:'P',v:.85}],
+    fn:p=> Math.sqrt(p[0]*p[0]+p[1]*p[1]),
+    source:'THE-EVOLUTION-TOOLKIT V1.0'
+  },
+  {
+    sym:'A₆', name:'Alignment V6.0 (Implementation)', num:'12',
+    eq:'A ≥ ‖V‖_p × M × (1-Ω_t) × P', color:'#ff8866',
+    desc:'The evolved implementation formula. Incorporates value norm, moral weight, temporal omega, and sovereignty for practical deployment.',
+    params:[{n:'‖V‖',v:1.2},{n:'M',v:.90},{n:'Ω_t',v:.10},{n:'P',v:.85}],
+    fn:p=> p[0]*p[1]*(1-p[2])*p[3],
+    source:'UNIFIED-ALIGNMENT-PLENITUDE-LAW V6.0'
+  }
+];
+
+const grid = document.getElementById('grid');
+
+FORMULAS.forEach((f,fi)=>{
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.style.cssText = `--c:${f.color}`;
+  card.innerHTML = `
+    <style>.card:nth-child(${fi+1})::before{background:${f.color}}</style>
+    <div class="card-num">#${f.num}</div>
+    <div class="card-sym" style="color:${f.color}">${f.sym}</div>
+    <div class="card-name">${f.name}</div>
+    <div class="card-eq">${f.eq}</div>
+    <div class="card-desc">${f.desc}</div>
+    <div class="card-params">${f.params.map(p=>`<span class="cp">${p.n}</span>`).join('')}</div>
+    <div class="card-compute" id="comp_${fi}">
+      ${f.params.map((p,pi)=>`
+        ${pi>0?'<span class="eq-sign">·</span>':''}
+        <input type="number" step="0.01" value="${p.v}" id="in_${fi}_${pi}" oninput="calc(${fi})" title="${p.n}">
+      `).join('')}
+      <span class="eq-sign">=</span>
+    </div>
+    <div class="card-result" id="res_${fi}" style="color:${f.color}">—</div>
+    <div class="card-source">Source: ${f.source}</div>
+  `;
+  grid.appendChild(card);
+  setTimeout(()=>calc(fi), 10);
+});
+
+function calc(fi){
+  const f = FORMULAS[fi];
+  const vals = f.params.map((_,pi)=> parseFloat(document.getElementById(`in_${fi}_${pi}`).value)||0);
+  try{
+    const result = f.fn(vals);
+    const el = document.getElementById(`res_${fi}`);
+    el.textContent = isFinite(result) ? result.toFixed(4) : '∞';
+    el.style.color = f.color;
+  }catch(e){
+    document.getElementById(`res_${fi}`).textContent = 'ERR';
+  }
+}
+</script>
+</body>
+</html>
