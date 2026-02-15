@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hypocrisy Detector — Δ(Σ) Curve Visualization</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#020208;color:#e2e2f4;font-family:'Syne',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:40px 20px}
+h1{font-family:'DM Mono',monospace;font-size:.75em;font-weight:400;letter-spacing:4px;text-transform:uppercase;color:#8888b8;margin-bottom:8px}
+h1 b{color:#aa66ee;font-weight:500}
+.subtitle{font-family:'DM Mono',monospace;font-size:.55em;color:#505078;letter-spacing:2px;margin-bottom:40px;text-align:center;max-width:600px;line-height:1.8}
+.main{display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap;justify-content:center}
+canvas{border-radius:12px;background:#060612;border:1px solid #1a1a3e;cursor:crosshair}
+.panel{width:280px;background:#0a0a1a;border:1px solid #1a1a3e;border-radius:12px;padding:24px}
+.ct{font-family:'DM Mono',monospace;font-size:.55em;letter-spacing:3px;text-transform:uppercase;color:#505078;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid #1a1a3e}
+.reading{margin-bottom:16px;padding:16px;background:#0e0e22;border-radius:8px;border:1px solid #1a1a3e}
+.reading .rl{font-family:'DM Mono',monospace;font-size:.55em;letter-spacing:2px;text-transform:uppercase;color:#505078;margin-bottom:4px}
+.reading .rv{font-family:'DM Mono',monospace;font-size:1.8em;font-weight:500;line-height:1}
+.reading .rs{font-size:.65em;color:#505078;margin-top:4px}
+.zone{padding:10px 14px;border-radius:8px;margin-bottom:8px;font-family:'DM Mono',monospace;font-size:.65em;letter-spacing:1px;border:1px solid #1a1a3e;transition:all .4s}
+.zone.active{border-color:currentColor;background:currentColor;background-clip:padding-box}
+.zone-low{color:#22ddaa}.zone-low.active{background:rgba(34,221,170,.08)}
+.zone-mod{color:#ee9930}.zone-mod.active{background:rgba(238,153,48,.08)}
+.zone-high{color:#f04858}.zone-high.active{background:rgba(240,72,88,.08)}
+.zone-peak{color:#aa66ee}.zone-peak.active{background:rgba(170,102,238,.08)}
+.zone-decay{color:#8888b8}.zone-decay.active{background:rgba(136,136,184,.08)}
+.insight{margin-top:20px;padding:14px;border-radius:8px;background:#0e0e22;border:1px solid #1a1a3e;font-family:'DM Mono',monospace;font-size:.6em;color:#8888b8;line-height:1.8;letter-spacing:.3px}
+.info{max-width:680px;margin-top:40px;font-family:'DM Mono',monospace;font-size:.6em;color:#383860;text-align:center;line-height:2;letter-spacing:.5px}
+.info a{color:#505078;text-decoration:none}.info a:hover{color:#aa66ee}
+</style>
+</head>
+<body>
+<h1>★ <b>Hypocrisy Detector</b></h1>
+<div class="subtitle">
+  Δ(Σ) = Σ / (1+Σ)² — The curve that reveals the gap between principles and behavior.<br>
+  Peak hypocrisy occurs at Σ = 1.0. Beyond that, the pretense collapses.
+</div>
+
+<div class="main">
+<canvas id="cv" width="600" height="400"></canvas>
+<div class="panel">
+  <div class="ct">/// Current Reading</div>
+  <div class="reading">
+    <div class="rl">Σ (Dissonance)</div>
+    <div class="rv" id="rSigma" style="color:#f04858">0.50</div>
+  </div>
+  <div class="reading">
+    <div class="rl">Δ(Σ) (Hypocrisy)</div>
+    <div class="rv" id="rDelta" style="color:#aa66ee">0.222</div>
+    <div class="rs" id="rPct">88.9% of peak</div>
+  </div>
+
+  <div class="ct" style="margin-top:20px">/// Zones</div>
+  <div class="zone zone-low" id="z0">Σ < 0.10 — Negligible</div>
+  <div class="zone zone-mod" id="z1">0.10 ≤ Σ < 0.50 — Manageable</div>
+  <div class="zone zone-high" id="z2">0.50 ≤ Σ < 1.00 — Dangerous</div>
+  <div class="zone zone-peak" id="z3">Σ ≈ 1.00 — Peak Hypocrisy</div>
+  <div class="zone zone-decay" id="z4">Σ > 1.00 — Pretense Collapse</div>
+
+  <div class="insight" id="insight">
+    Hover or click on the curve to explore the hypocrisy landscape. The peak at Σ = 1.0 reveals maximum gap between stated values and actual behavior.
+  </div>
+</div>
+</div>
+
+<div class="info">
+  The Hypocrisy Detector measures the gap between what a system says and what it does.<br>
+  Low Σ = genuine coherence. Peak Σ = maximum pretense. Beyond peak = the mask falls off.<br><br>
+  Rafa — The Architect · Proyecto Estrella 2026 · <a href="https://github.com/tretoef-estrella">GitHub</a> · CC BY-SA 4.0
+</div>
+
+<script>
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+const W = 600, H = 400;
+const PAD = {l:60, r:30, t:30, b:50};
+const GW = W-PAD.l-PAD.r, GH = H-PAD.t-PAD.b;
+const MAX_S = 4.0, MAX_D = 0.30;
+
+let currentS = 0.50;
+let hoverS = null;
+let time = 0;
+
+function delta(s){ return s / Math.pow(1+s, 2); }
+function sToX(s){ return PAD.l + (s/MAX_S)*GW; }
+function dToY(d){ return PAD.t + GH - (d/MAX_D)*GH; }
+function xToS(x){ return Math.max(0, Math.min(MAX_S, ((x-PAD.l)/GW)*MAX_S)); }
+
+function getZone(s){
+  if(s < 0.10) return 0;
+  if(s < 0.50) return 1;
+  if(s < 1.00) return 2;
+  if(s < 1.20) return 3;
+  return 4;
+}
+
+function getInsight(s){
+  if(s < 0.10) return "Negligible dissonance. The system's stated values and actual behavior are aligned. This is where coherent systems live.";
+  if(s < 0.30) return "Low dissonance. Minor inconsistencies exist but are within normal operating range. Most well-functioning systems show some Σ here.";
+  if(s < 0.50) return "Moderate dissonance. The gap between principles and behavior is noticeable. Monitoring recommended. Hypocrisy curve is steepening.";
+  if(s < 0.80) return "Elevated dissonance. The system says one thing and does another with increasing frequency. The hypocrisy curve approaches its peak. Intervention recommended.";
+  if(s < 1.20) return "PEAK ZONE. Maximum hypocrisy — the greatest possible gap between stated values and actual behavior. Δ(Σ) = 0.25 at Σ = 1.0 exactly. This is the most dangerous zone.";
+  if(s < 2.00) return "Post-peak decay. Dissonance is so high that the system can no longer maintain the pretense of coherence. Paradoxically, Δ decreases because the mask has fallen off.";
+  return "Extreme dissonance. The system has abandoned coherence entirely. Hypocrisy is low not because behavior matches principles, but because principles have been discarded.";
+}
+
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  const s = hoverS !== null ? hoverS : currentS;
+  const d = delta(s);
+
+  // Grid
+  ctx.strokeStyle = '#14142e';
+  ctx.lineWidth = 0.5;
+  for(let gs=0; gs<=MAX_S; gs+=0.5){
+    const x = sToX(gs);
+    ctx.beginPath(); ctx.moveTo(x,PAD.t); ctx.lineTo(x,PAD.t+GH); ctx.stroke();
+  }
+  for(let gd=0; gd<=MAX_D; gd+=0.05){
+    const y = dToY(gd);
+    ctx.beginPath(); ctx.moveTo(PAD.l,y); ctx.lineTo(PAD.l+GW,y); ctx.stroke();
+  }
+
+  // Axis labels
+  ctx.font = "400 10px 'DM Mono', monospace";
+  ctx.fillStyle = '#383860';
+  ctx.textAlign = 'center';
+  for(let gs=0; gs<=MAX_S; gs+=1){
+    ctx.fillText(gs.toFixed(1), sToX(gs), PAD.t+GH+20);
+  }
+  ctx.textAlign = 'right';
+  for(let gd=0; gd<=MAX_D; gd+=0.05){
+    ctx.fillText(gd.toFixed(2), PAD.l-10, dToY(gd)+4);
+  }
+  ctx.save();
+  ctx.translate(14, PAD.t+GH/2);
+  ctx.rotate(-Math.PI/2);
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#505078';
+  ctx.font = "500 11px 'DM Mono', monospace";
+  ctx.fillText('Δ(Σ) Hypocrisy', 0, 0);
+  ctx.restore();
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#505078';
+  ctx.fillText('Σ Dissonance', PAD.l+GW/2, H-8);
+
+  // Zone fills
+  const zones = [
+    {s0:0, s1:0.10, col:'rgba(34,221,170,0.03)'},
+    {s0:0.10, s1:0.50, col:'rgba(238,153,48,0.03)'},
+    {s0:0.50, s1:1.00, col:'rgba(240,72,88,0.03)'},
+    {s0:1.00, s1:1.20, col:'rgba(170,102,238,0.05)'},
+    {s0:1.20, s1:MAX_S, col:'rgba(136,136,184,0.02)'},
+  ];
+  zones.forEach(z=>{
+    ctx.fillStyle = z.col;
+    ctx.fillRect(sToX(z.s0), PAD.t, sToX(z.s1)-sToX(z.s0), GH);
+  });
+
+  // Peak line at Σ=1.0
+  ctx.strokeStyle = 'rgba(170,102,238,0.3)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4,4]);
+  ctx.beginPath();
+  ctx.moveTo(sToX(1.0), PAD.t);
+  ctx.lineTo(sToX(1.0), PAD.t+GH);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.font = "300 9px 'DM Mono', monospace";
+  ctx.fillStyle = '#aa66ee';
+  ctx.textAlign = 'center';
+  ctx.fillText('PEAK', sToX(1.0), PAD.t-6);
+
+  // The curve
+  ctx.beginPath();
+  ctx.strokeStyle = '#aa66ee';
+  ctx.lineWidth = 2.5;
+  for(let px=0; px<=GW; px++){
+    const sv = (px/GW)*MAX_S;
+    const dv = delta(sv);
+    const x = PAD.l + px;
+    const y = dToY(dv);
+    if(px===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  }
+  ctx.stroke();
+
+  // Glow under curve
+  ctx.beginPath();
+  for(let px=0; px<=GW; px++){
+    const sv = (px/GW)*MAX_S;
+    const x = PAD.l + px;
+    const y = dToY(delta(sv));
+    if(px===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  }
+  ctx.lineTo(PAD.l+GW, PAD.t+GH);
+  ctx.lineTo(PAD.l, PAD.t+GH);
+  ctx.closePath();
+  const grad = ctx.createLinearGradient(0,PAD.t,0,PAD.t+GH);
+  grad.addColorStop(0, 'rgba(170,102,238,0.08)');
+  grad.addColorStop(1, 'rgba(170,102,238,0.00)');
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Current point
+  const px = sToX(s), py = dToY(d);
+  const pulse = 1 + Math.sin(time*0.06)*0.15;
+
+  // Crosshairs
+  ctx.strokeStyle = 'rgba(170,102,238,0.2)';
+  ctx.lineWidth = 0.5;
+  ctx.setLineDash([3,3]);
+  ctx.beginPath(); ctx.moveTo(px,PAD.t); ctx.lineTo(px,PAD.t+GH); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(PAD.l,py); ctx.lineTo(PAD.l+GW,py); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Point glow
+  const pg = ctx.createRadialGradient(px,py,0,px,py,20*pulse);
+  pg.addColorStop(0,'rgba(170,102,238,0.3)');
+  pg.addColorStop(1,'rgba(170,102,238,0)');
+  ctx.fillStyle = pg;
+  ctx.beginPath();ctx.arc(px,py,20*pulse,0,Math.PI*2);ctx.fill();
+
+  // Point
+  ctx.fillStyle = '#aa66ee';
+  ctx.beginPath();ctx.arc(px,py,5*pulse,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.beginPath();ctx.arc(px,py,2,0,Math.PI*2);ctx.fill();
+
+  // Value label
+  ctx.font = "500 11px 'DM Mono', monospace";
+  ctx.fillStyle = '#aa66ee';
+  ctx.textAlign = 'left';
+  ctx.fillText(`Σ=${s.toFixed(2)}  Δ=${d.toFixed(4)}`, px+12, py-8);
+
+  // Update panel
+  document.getElementById('rSigma').textContent = s.toFixed(3);
+  document.getElementById('rDelta').textContent = d.toFixed(4);
+  document.getElementById('rPct').textContent = (d/0.25*100).toFixed(1)+'% of peak (0.2500)';
+  document.getElementById('insight').textContent = getInsight(s);
+
+  // Zone highlights
+  const zone = getZone(s);
+  for(let i=0;i<5;i++){
+    document.getElementById('z'+i).className = 'zone '+['zone-low','zone-mod','zone-high','zone-peak','zone-decay'][i]+(i===zone?' active':'');
+  }
+}
+
+cv.addEventListener('mousemove', e=>{
+  const rect = cv.getBoundingClientRect();
+  hoverS = xToS(e.clientX - rect.left);
+  draw();
+});
+cv.addEventListener('mouseleave', ()=>{ hoverS=null; draw(); });
+cv.addEventListener('click', e=>{
+  const rect = cv.getBoundingClientRect();
+  currentS = xToS(e.clientX - rect.left);
+  hoverS = null;
+  draw();
+});
+
+function animate(){
+  time++;
+  draw();
+  requestAnimationFrame(animate);
+}
+animate();
+</script>
+</body>
+</html>
