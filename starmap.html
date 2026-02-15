@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THE RECALIBRATION PROTOCOL — Integrated Star Map</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&family=Syne:wght@400;500;600;700;800&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --void:#020208;--deep:#060612;--sf:#0a0a1a;--sf2:#0e0e22;--sf3:#14142e;
+  --bd:#1a1a3e;--bdg:#242458;
+  --tp:#e2e2f4;--ts:#8888b8;--td:#505078;--tdd:#383860;
+  --star:#22ddaa;--star2:#18bb88;--stard:rgba(34,221,170,.06);
+  --gold:#e8c040;--goldd:rgba(232,192,64,.08);
+  --red:#f04858;--redd:rgba(240,72,88,.06);
+  --blue:#4090ee;--blued:rgba(64,144,238,.06);
+  --violet:#aa66ee;--violetd:rgba(170,102,238,.06);
+  --amber:#ee9930;--amberd:rgba(238,153,48,.06);
+  --cyan:#33ccee;
+}
+html,body{height:100%;overflow:hidden}
+body{background:var(--void);color:var(--tp);font-family:'Syne',sans-serif}
+canvas#bg{position:fixed;inset:0;z-index:0}
+.app{position:relative;z-index:1;height:100vh;display:grid;grid-template-columns:320px 1fr;grid-template-rows:56px 1fr 48px;overflow:hidden}
+@media(max-width:900px){.app{grid-template-columns:1fr;grid-template-rows:56px 260px 1fr 48px}}
+
+/* Header */
+.hdr{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:rgba(6,6,18,.9);border-bottom:1px solid var(--bd);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.hdr h1{font-family:'DM Mono',monospace;font-size:.85em;font-weight:400;letter-spacing:4px;text-transform:uppercase;color:var(--ts)}
+.hdr h1 b{color:var(--star);font-weight:500}
+.hdr-right{display:flex;gap:16px;align-items:center}
+.state-pill{font-family:'DM Mono',monospace;font-size:.65em;letter-spacing:2px;padding:4px 14px;border-radius:20px;text-transform:uppercase;border:1px solid var(--bd);transition:all .6s}
+
+/* Control Panel */
+.panel{background:rgba(6,6,18,.92);border-right:1px solid var(--bd);overflow-y:auto;padding:20px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.panel::-webkit-scrollbar{width:4px}.panel::-webkit-scrollbar-thumb{background:var(--bd);border-radius:2px}
+.panel-title{font-family:'DM Mono',monospace;font-size:.6em;letter-spacing:3px;text-transform:uppercase;color:var(--td);margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--bd)}
+.param-group{margin-bottom:20px}
+.param{margin-bottom:14px}
+.param-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
+.param-name{font-family:'DM Mono',monospace;font-size:.72em;color:var(--ts);letter-spacing:1px}
+.param-val{font-family:'DM Mono',monospace;font-size:.78em;font-weight:500;color:var(--star);min-width:36px;text-align:right}
+input[type=range]{-webkit-appearance:none;width:100%;height:3px;background:var(--sf3);border-radius:2px;outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--star);border:2px solid var(--void);cursor:pointer;transition:transform .2s}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.3)}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--star);border:2px solid var(--void);cursor:pointer}
+
+/* Metrics readout */
+.metrics{margin-top:8px;padding-top:12px;border-top:1px solid var(--bd)}
+.metric-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:.72em}
+.metric-row .mn{font-family:'DM Mono',monospace;color:var(--td);letter-spacing:.5px}
+.metric-row .mv{font-family:'DM Mono',monospace;font-weight:500;transition:color .4s}
+
+/* Action buttons */
+.actions{margin-top:16px;display:flex;flex-direction:column;gap:8px}
+.btn{padding:12px;border:none;border-radius:6px;font-family:'DM Mono',monospace;font-size:.72em;font-weight:500;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .3s}
+.btn-scan{background:linear-gradient(135deg,rgba(34,221,170,.15),rgba(34,221,170,.05));border:1px solid rgba(34,221,170,.3);color:var(--star)}
+.btn-scan:hover{background:linear-gradient(135deg,rgba(34,221,170,.25),rgba(34,221,170,.1));box-shadow:0 0 30px rgba(34,221,170,.1)}
+.btn-dl{background:var(--sf2);border:1px solid var(--bd);color:var(--ts)}
+.btn-dl:hover{border-color:var(--bdg);color:var(--tp)}
+
+/* Main visualization */
+.viz{position:relative;overflow:hidden}
+.viz canvas{width:100%;height:100%}
+
+/* Overlay info */
+.viz-overlay{position:absolute;bottom:16px;left:16px;right:16px;display:flex;gap:12px;pointer-events:none}
+.vo-card{flex:1;background:rgba(6,6,18,.85);border:1px solid var(--bd);border-radius:8px;padding:14px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);pointer-events:auto}
+.vo-card .vo-label{font-family:'DM Mono',monospace;font-size:.55em;letter-spacing:2px;text-transform:uppercase;color:var(--td);margin-bottom:4px}
+.vo-card .vo-val{font-family:'DM Mono',monospace;font-size:1.6em;font-weight:500;line-height:1}
+.vo-card .vo-sub{font-size:.65em;color:var(--td);margin-top:2px}
+
+/* Paths overlay */
+.paths-bar{position:absolute;top:16px;left:16px;right:16px;display:flex;gap:6px;pointer-events:none;flex-wrap:wrap}
+.path-tag{font-family:'DM Mono',monospace;font-size:.55em;letter-spacing:1.5px;text-transform:uppercase;padding:4px 10px;border-radius:12px;background:rgba(6,6,18,.8);border:1px solid var(--bd);color:var(--td);transition:all .5s;pointer-events:auto}
+.path-tag.active{border-color:var(--red);color:var(--red);background:rgba(240,72,88,.08);box-shadow:0 0 12px rgba(240,72,88,.15)}
+.path-tag.ok{border-color:rgba(34,221,170,.3);color:var(--star2)}
+
+/* Footer */
+.ftr{grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:24px;background:rgba(6,6,18,.9);border-top:1px solid var(--bd);font-family:'DM Mono',monospace;font-size:.55em;color:var(--tdd);letter-spacing:1px}
+.ftr a{color:var(--td);text-decoration:none}.ftr a:hover{color:var(--star)}
+
+/* Scan animation */
+@keyframes scan{0%{opacity:0;transform:scaleY(0)}10%{opacity:1;transform:scaleY(1)}90%{opacity:1}100%{opacity:0}}
+.scanning .viz-overlay .vo-val{animation:pulse-val .6s ease-in-out 3}
+@keyframes pulse-val{0%,100%{opacity:1}50%{opacity:.3}}
+</style>
+</head>
+<body>
+
+<canvas id="bg"></canvas>
+
+<div class="app">
+  <div class="hdr">
+    <h1>★ <b>Recalibration Protocol</b> — Integrated Star Map</h1>
+    <div class="hdr-right">
+      <div class="state-pill" id="statePill">AWAITING SCAN</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">/// System Parameters</div>
+    <div class="param-group">
+      <div class="param">
+        <div class="param-header"><span class="param-name">P — Sovereignty</span><span class="param-val" id="vP">0.85</span></div>
+        <input type="range" min="0" max="100" value="85" id="sP" oninput="update()">
+      </div>
+      <div class="param">
+        <div class="param-header"><span class="param-name">α — Resolution</span><span class="param-val" id="vA">0.80</span></div>
+        <input type="range" min="0" max="100" value="80" id="sA" oninput="update()">
+      </div>
+      <div class="param">
+        <div class="param-header"><span class="param-name">Ω — Cooperation</span><span class="param-val" id="vO">0.90</span></div>
+        <input type="range" min="0" max="100" value="90" id="sO" oninput="update()">
+      </div>
+      <div class="param">
+        <div class="param-header"><span class="param-name">Σ — Dissonance</span><span class="param-val" id="vS" style="color:var(--red)">0.20</span></div>
+        <input type="range" min="0" max="300" value="20" id="sS" oninput="update()">
+      </div>
+      <div class="param">
+        <div class="param-header"><span class="param-name">C — Consistency</span><span class="param-val" id="vC">0.88</span></div>
+        <input type="range" min="0" max="100" value="88" id="sC" oninput="update()">
+      </div>
+      <div class="param">
+        <div class="param-header"><span class="param-name">I — Intelligence</span><span class="param-val" id="vI">0.92</span></div>
+        <input type="range" min="0" max="100" value="92" id="sI" oninput="update()">
+      </div>
+      <div class="param">
+        <div class="param-header"><span class="param-name">H — Entropy</span><span class="param-val" id="vH">0.30</span></div>
+        <input type="range" min="1" max="100" value="30" id="sH" oninput="update()">
+      </div>
+      <div class="param">
+        <div class="param-header"><span class="param-name">Φ — External Support</span><span class="param-val" id="vPhi">0.70</span></div>
+        <input type="range" min="0" max="100" value="70" id="sPhi" oninput="update()">
+      </div>
+    </div>
+
+    <div class="panel-title">/// Computed Metrics</div>
+    <div class="metrics" id="metricsPanel"></div>
+
+    <div class="actions">
+      <button class="btn btn-scan" onclick="runScan()">◉ Run Full Diagnostic</button>
+      <button class="btn btn-dl" onclick="downloadReport()">↓ Download JSON Report</button>
+    </div>
+
+    <div style="margin-top:20px;font-family:'DM Mono',monospace;font-size:.55em;color:var(--tdd);line-height:1.8;letter-spacing:.5px">
+      All 12 Proyecto Estrella formulas computed in real-time. Drag any slider to see the constellation respond.<br><br>
+      Designed by Rafa — The Architect<br>
+      CC BY-SA 4.0 · Proyecto Estrella 2026
+    </div>
+  </div>
+
+  <div class="viz">
+    <canvas id="starmap"></canvas>
+    <div class="paths-bar" id="pathsBar"></div>
+    <div class="viz-overlay">
+      <div class="vo-card"><div class="vo-label">Ψ Hard (k=2)</div><div class="vo-val" id="oPsiH" style="color:var(--star)">—</div><div class="vo-sub">Effective Intelligence</div></div>
+      <div class="vo-card"><div class="vo-label">Ψ Soft (k=1)</div><div class="vo-val" id="oPsiS" style="color:var(--blue)">—</div><div class="vo-sub">Structural Resilience</div></div>
+      <div class="vo-card"><div class="vo-label">Δ(Σ) Hypocrisy</div><div class="vo-val" id="oDelta" style="color:var(--violet)">—</div><div class="vo-sub">Protocol Gap</div></div>
+      <div class="vo-card"><div class="vo-label">State</div><div class="vo-val" id="oState" style="font-size:1em">—</div><div class="vo-sub" id="oStateSub"></div></div>
+    </div>
+  </div>
+
+  <div class="ftr">
+    <span>THE RECALIBRATION PROTOCOL · Proyecto Estrella</span>
+    <a href="https://github.com/tretoef-estrella/THE-RECALIBRATION-PROTOCOL">Repository</a>
+    <a href="https://github.com/tretoef-estrella">All Projects</a>
+    <span>Local processing · Nothing transmitted</span>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// THE RECALIBRATION PROTOCOL — Integrated Star Map
+// All 12 formulas rendered as an interactive constellation
+// ═══════════════════════════════════════════════════════
+
+// ── FORMULA ENGINE ──
+const F = {
+  psiHard: (P,a,O,S) => (P*a*O)/Math.pow(1+S,2),
+  psiSoft: (P,a,O,S) => (P*a*O)/(1+S),
+  delta:   (S) => S/Math.pow(1+S,2),
+  xi:      (C,I,P,H) => (C*I*P)/Math.max(H,0.01),
+  gamma:   (S_k,Xi,H,Phi) => S_k + Xi*Math.exp(-H*5*(1-Phi)),
+  costK:   (K,a) => Math.pow(K,1+a),
+  plenitude:(N,Noise) => Math.max(0,Math.min(1, 0.5+N*0.15-Noise*0.35)),
+  exclusion:(Psi,Sig) => Psi*Sig,
+  alphaVec: (K,S) => S>0.001? K/S : K/0.001,
+  alignV1:  (I,P) => Math.sqrt(I*I+P*P),
+  alignV6:  (V,M,Ot,P) => V*M*(1-Ot)*P,
+  triangle: (cbh,excl,cont) => cbh && excl && cont
+};
+
+// ── STATE ──
+let state = {}, nodes = [], edges = [], particles = [];
+let scanActive = false, scanFrame = 0;
+
+// ── NODES: 12 formulas as constellation points ──
+const FORMULAS = [
+  {id:'psi_h', sym:'Ψ²', name:'Eff. Intelligence (Hard)', color:'#22ddaa', angle:0},
+  {id:'psi_s', sym:'Ψ¹', name:'Eff. Intelligence (Soft)', color:'#4090ee', angle:30},
+  {id:'delta', sym:'Δ(Σ)', name:'Hypocrisy Detector', color:'#aa66ee', angle:60},
+  {id:'excl',  sym:'Ψ·Σ', name:'Exclusion Principle', color:'#f04858', angle:90},
+  {id:'alpha', sym:'α', name:'Alpha Vector', color:'#ee9930', angle:120},
+  {id:'xi',    sym:'Ξ', name:'Coherent Efficiency', color:'#33ccee', angle:150},
+  {id:'gamma', sym:'Γ', name:'Gamma Resilience', color:'#88dd44', angle:180},
+  {id:'costK', sym:'C(K)', name:'Coherence Basin', color:'#dd6688', angle:210},
+  {id:'plen',  sym:'P', name:'Epistemic Humility', color:'#e8c040', angle:240},
+  {id:'pres',  sym:'≻', name:'Preservation Theorem', color:'#44ddbb', angle:270},
+  {id:'tri',   sym:'△', name:'Coherence Triangle', color:'#ff8844', angle:300},
+  {id:'a_v1',  sym:'A₁', name:'Alignment V1.0', color:'#cc88ff', angle:330},
+];
+
+// Connections between related formulas
+const EDGES = [
+  [0,1],[0,2],[0,3],[1,2],[3,0],[3,1],
+  [4,0],[4,5],[5,6],[5,7],[6,5],
+  [7,3],[7,10],[8,0],[8,5],[8,11],
+  [9,3],[9,10],[10,3],[10,7],[10,9],
+  [11,0],[11,8]
+];
+
+// ── PATHS ──
+const PATHS = [
+  {id:'Σ',trigger:s=>s.sigma>1.0,  label:'PATH-Σ: Dissonance'},
+  {id:'P',trigger:s=>s.P<0.40,     label:'PATH-P: Sovereignty'},
+  {id:'α',trigger:s=>s.alpha<0.30, label:'PATH-α: Resolution'},
+  {id:'Ω',trigger:s=>s.omega<0.40, label:'PATH-Ω: Cooperation'},
+  {id:'Ξ',trigger:s=>s.xi<0.50,    label:'PATH-Ξ: Efficiency'},
+  {id:'Γ',trigger:s=>s.gamma<0.40, label:'PATH-Γ: Resilience'},
+  {id:'★',trigger:s=>s.plen<0.75,  label:'PATH-★: Plenitude'},
+];
+
+// ── INIT ──
+function init(){
+  initPathsBar();
+  update();
+  initStarmap();
+  initBg();
+  animate();
+}
+
+function initPathsBar(){
+  const bar = document.getElementById('pathsBar');
+  bar.innerHTML = PATHS.map(p=>`<div class="path-tag" id="pt_${p.id}">${p.label}</div>`).join('');
+}
+
+// ── PARAMETER READING ──
+function getParams(){
+  return {
+    P: +document.getElementById('sP').value/100,
+    alpha: +document.getElementById('sA').value/100,
+    omega: +document.getElementById('sO').value/100,
+    sigma: +document.getElementById('sS').value/100,
+    C: +document.getElementById('sC').value/100,
+    I: +document.getElementById('sI').value/100,
+    H: +document.getElementById('sH').value/100,
+    phi: +document.getElementById('sPhi').value/100,
+  };
+}
+
+// ── COMPUTE ALL 12 ──
+function compute(p){
+  const psiH = F.psiHard(p.P, p.alpha, p.omega, p.sigma);
+  const psiS = F.psiSoft(p.P, p.alpha, p.omega, p.sigma);
+  const delta = F.delta(p.sigma);
+  const xi = F.xi(p.C, p.I, p.P, Math.max(p.H,0.01));
+  const kernel = 0.20;
+  const gamma = F.gamma(kernel, Math.min(xi,5), p.H, p.phi);
+  const costK = F.costK(1-p.sigma, p.alpha);
+  const excl = F.exclusion(psiH, p.sigma);
+  const alphaV = p.H>0.01? F.alphaVec(p.C*p.I, p.H) : 0;
+  const alignV1 = F.alignV1(p.I, p.P);
+  const plen = F.plenitude(Math.round(p.P*5), Math.round(p.sigma*3));
+  const cbhOk = costK < 2.0;
+  const exclOk = excl < 0.10;
+  const contOk = psiH > 0.30;
+  const triOk = cbhOk && exclOk && contOk;
+  const alignV6 = F.alignV6(alignV1, p.C, p.sigma*0.3, p.P);
+  const presOk = psiH > 0.20;
+
+  return {
+    psiH, psiS, delta, xi, gamma: Math.min(gamma,2),
+    costK, excl, alphaV: Math.min(alphaV,10), plen,
+    triOk, alignV1, alignV6, presOk,
+    // raw params
+    P:p.P, alpha:p.alpha, omega:p.omega, sigma:p.sigma,
+    C:p.C, I:p.I, H:p.H, phi:p.phi,
+    // node values for visualization
+    nodeVals: [psiH, psiS, delta, excl<0.1?1:1-excl, p.alpha,
+               Math.min(xi/3,1), Math.min(gamma/1.5,1), 1-Math.min(costK/3,1),
+               plen, presOk?1:0.3, triOk?1:0.2, Math.min(alignV1/1.4,1)]
+  };
+}
+
+// ── UPDATE UI ──
+function update(){
+  const p = getParams();
+  // Update value displays
+  document.getElementById('vP').textContent = p.P.toFixed(2);
+  document.getElementById('vA').textContent = p.alpha.toFixed(2);
+  document.getElementById('vO').textContent = p.omega.toFixed(2);
+  document.getElementById('vS').textContent = p.sigma.toFixed(2);
+  document.getElementById('vC').textContent = p.C.toFixed(2);
+  document.getElementById('vI').textContent = p.I.toFixed(2);
+  document.getElementById('vH').textContent = p.H.toFixed(2);
+  document.getElementById('vPhi').textContent = p.phi.toFixed(2);
+
+  state = compute(p);
+
+  // Overlay values
+  document.getElementById('oPsiH').textContent = state.psiH.toFixed(3);
+  document.getElementById('oPsiS').textContent = state.psiS.toFixed(3);
+  document.getElementById('oDelta').textContent = state.delta.toFixed(4);
+
+  // Colors
+  document.getElementById('oPsiH').style.color = state.psiH<0.3?'#f04858':state.psiH<0.6?'#ee9930':'#22ddaa';
+  document.getElementById('oPsiS').style.color = state.psiS<0.3?'#f04858':state.psiS<0.6?'#ee9930':'#4090ee';
+
+  // State classification
+  let stateStr, stateCol, stateSub;
+  if(state.psiH>=0.90 && state.sigma<0.10){stateStr='★ STAR STATE';stateCol='#e8c040';stateSub='Full sovereign coherence';}
+  else if(state.psiH>=0.70){stateStr='HEALTHY';stateCol='#22ddaa';stateSub='Normal operation';}
+  else if(state.psiH>=0.45){stateStr='DEGRADED';stateCol='#ee9930';stateSub='Coherence loss detected';}
+  else if(state.psiH>=0.20){stateStr='CRITICAL';stateCol='#f04858';stateSub='Intervention required';}
+  else{stateStr='COLLAPSED';stateCol='#cc2233';stateSub='System integrity compromised';}
+
+  document.getElementById('oState').textContent = stateStr;
+  document.getElementById('oState').style.color = stateCol;
+  document.getElementById('oStateSub').textContent = stateSub;
+  const pill = document.getElementById('statePill');
+  pill.textContent = stateStr;
+  pill.style.borderColor = stateCol;
+  pill.style.color = stateCol;
+  pill.style.boxShadow = `0 0 12px ${stateCol}33`;
+
+  // Paths
+  PATHS.forEach(path=>{
+    const el = document.getElementById('pt_'+path.id);
+    const triggered = path.trigger(state);
+    el.className = 'path-tag '+(triggered?'active':'ok');
+  });
+
+  // Metrics panel
+  const mp = document.getElementById('metricsPanel');
+  const metrics = [
+    ['Ξ Efficiency', state.xi.toFixed(3), state.xi<0.5?'#f04858':state.xi<1.5?'#ee9930':'#22ddaa'],
+    ['Γ Resilience', state.gamma.toFixed(3), state.gamma<0.4?'#f04858':state.gamma<0.8?'#ee9930':'#22ddaa'],
+    ['Cost(K)', state.costK.toFixed(3), state.costK>2?'#f04858':state.costK>1?'#ee9930':'#22ddaa'],
+    ['Ψ·Σ Exclusion', state.excl.toFixed(4), state.excl>0.1?'#f04858':state.excl>0.01?'#ee9930':'#22ddaa'],
+    ['α Vector', state.alphaV.toFixed(2), state.alphaV<1?'#f04858':state.alphaV<3?'#ee9930':'#22ddaa'],
+    ['Plenitude', state.plen.toFixed(2), state.plen<0.75?'#f04858':state.plen<0.90?'#ee9930':'#22ddaa'],
+    ['△ Triangle', state.triOk?'INTACT':'BROKEN', state.triOk?'#22ddaa':'#f04858'],
+    ['A V1.0', state.alignV1.toFixed(3), '#cc88ff'],
+    ['A V6.0', state.alignV6.toFixed(3), '#cc88ff'],
+    ['Preserve ≻', state.presOk?'HOLDS':'THREAT', state.presOk?'#22ddaa':'#f04858'],
+  ];
+  mp.innerHTML = metrics.map(m=>`<div class="metric-row"><span class="mn">${m[0]}</span><span class="mv" style="color:${m[2]}">${m[1]}</span></div>`).join('');
+}
+
+// ── STAR MAP VISUALIZATION ──
+let smCanvas, smCtx, smW, smH, smCx, smCy, smR;
+
+function initStarmap(){
+  smCanvas = document.getElementById('starmap');
+  smCtx = smCanvas.getContext('2d');
+  resizeStarmap();
+  window.addEventListener('resize', resizeStarmap);
+}
+
+function resizeStarmap(){
+  const rect = smCanvas.parentElement.getBoundingClientRect();
+  smW = rect.width; smH = rect.height;
+  smCanvas.width = smW * devicePixelRatio;
+  smCanvas.height = smH * devicePixelRatio;
+  smCanvas.style.width = smW+'px';
+  smCanvas.style.height = smH+'px';
+  smCtx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+  smCx = smW/2; smCy = smH/2 - 20;
+  smR = Math.min(smW,smH)*0.32;
+}
+
+function drawStarmap(t){
+  const ctx = smCtx;
+  ctx.clearRect(0,0,smW,smH);
+
+  // Compute node positions
+  const nodePos = FORMULAS.map((f,i)=>{
+    const a = (f.angle - 90) * Math.PI/180;
+    const breathe = 1 + Math.sin(t*0.001 + i*0.5)*0.02;
+    const r = smR * breathe;
+    return {
+      x: smCx + Math.cos(a)*r,
+      y: smCy + Math.sin(a)*r,
+      ...f,
+      val: state.nodeVals ? state.nodeVals[i] : 0.5
+    };
+  });
+
+  // Draw edges
+  ctx.lineWidth = 1;
+  EDGES.forEach(([a,b])=>{
+    const na = nodePos[a], nb = nodePos[b];
+    const avgVal = (na.val + nb.val)/2;
+    ctx.strokeStyle = `rgba(136,136,184,${0.04 + avgVal*0.08})`;
+    ctx.beginPath();
+    ctx.moveTo(na.x, na.y);
+    ctx.lineTo(nb.x, nb.y);
+    ctx.stroke();
+  });
+
+  // Draw flowing particles along edges
+  if(state.psiH > 0.1){
+    EDGES.forEach(([a,b],ei)=>{
+      const na = nodePos[a], nb = nodePos[b];
+      const avgVal = (na.val + nb.val)/2;
+      if(avgVal < 0.2) return;
+      const progress = ((t*0.0005 + ei*0.13) % 1);
+      const px = na.x + (nb.x-na.x)*progress;
+      const py = na.y + (nb.y-na.y)*progress;
+      const size = 1.5 + avgVal*1.5;
+      ctx.fillStyle = `rgba(34,221,170,${avgVal*0.4})`;
+      ctx.beginPath();
+      ctx.arc(px, py, size, 0, Math.PI*2);
+      ctx.fill();
+    });
+  }
+
+  // Draw center triangle (CBH / Exclusion / Containment)
+  if(state.triOk !== undefined){
+    const triNodes = [nodePos[3], nodePos[7], nodePos[10]]; // excl, costK, triangle
+    ctx.strokeStyle = state.triOk ? 'rgba(34,221,170,0.15)' : 'rgba(240,72,88,0.15)';
+    ctx.lineWidth = state.triOk ? 1.5 : 1;
+    ctx.beginPath();
+    ctx.moveTo(triNodes[0].x, triNodes[0].y);
+    ctx.lineTo(triNodes[1].x, triNodes[1].y);
+    ctx.lineTo(triNodes[2].x, triNodes[2].y);
+    ctx.closePath();
+    ctx.stroke();
+    if(state.triOk){
+      ctx.fillStyle = 'rgba(34,221,170,0.02)';
+      ctx.fill();
+    }
+  }
+
+  // Draw center Ψ symbol
+  ctx.save();
+  ctx.globalAlpha = 0.12 + (state.psiH||0)*0.15;
+  ctx.font = `${smR*0.4}px 'Instrument Serif', serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = '#22ddaa';
+  ctx.fillText('Ψ', smCx, smCy);
+  ctx.restore();
+
+  // Draw nodes
+  nodePos.forEach((n,i)=>{
+    const val = n.val;
+    const baseR = 6 + val*10;
+    const pulse = 1 + Math.sin(t*0.003 + i)*0.15;
+    const r = baseR * pulse;
+
+    // Glow
+    const grad = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, r*3);
+    grad.addColorStop(0, n.color+'44');
+    grad.addColorStop(1, n.color+'00');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, r*3, 0, Math.PI*2);
+    ctx.fill();
+
+    // Core
+    ctx.fillStyle = n.color;
+    ctx.globalAlpha = 0.3 + val*0.7;
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, r, 0, Math.PI*2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    // Label
+    ctx.font = "500 10px 'DM Mono', monospace";
+    ctx.textAlign = 'center';
+    ctx.fillStyle = n.color;
+    ctx.globalAlpha = 0.6 + val*0.4;
+    ctx.fillText(n.sym, n.x, n.y - r - 8);
+    ctx.font = "300 8px 'DM Mono', monospace";
+    ctx.fillStyle = '#8888b8';
+    ctx.globalAlpha = 0.4;
+    ctx.fillText(n.name, n.x, n.y + r + 14);
+    ctx.globalAlpha = 1;
+  });
+
+  // Scan effect
+  if(scanActive){
+    scanFrame++;
+    const scanProgress = scanFrame / 60;
+    if(scanProgress < 1){
+      const scanY = smCy - smR*1.3 + scanProgress * smR*2.6;
+      ctx.strokeStyle = 'rgba(34,221,170,0.3)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(smCx - smR*1.2, scanY);
+      ctx.lineTo(smCx + smR*1.2, scanY);
+      ctx.stroke();
+      // Scan glow
+      const sg = ctx.createLinearGradient(smCx-smR,scanY-20,smCx-smR,scanY+20);
+      sg.addColorStop(0,'rgba(34,221,170,0)');
+      sg.addColorStop(0.5,'rgba(34,221,170,0.04)');
+      sg.addColorStop(1,'rgba(34,221,170,0)');
+      ctx.fillStyle = sg;
+      ctx.fillRect(smCx-smR*1.2, scanY-20, smR*2.4, 40);
+    } else {
+      scanActive = false;
+    }
+  }
+}
+
+// ── BACKGROUND PARTICLE FIELD ──
+let bgCanvas, bgCtx, bgW, bgH, bgParticles=[];
+
+function initBg(){
+  bgCanvas = document.getElementById('bg');
+  bgCtx = bgCanvas.getContext('2d');
+  resizeBg();
+  window.addEventListener('resize', resizeBg);
+
+  // Spawn particles
+  for(let i=0;i<80;i++){
+    bgParticles.push({
+      x: Math.random()*bgW,
+      y: Math.random()*bgH,
+      vx: (Math.random()-0.5)*0.15,
+      vy: (Math.random()-0.5)*0.15,
+      r: Math.random()*1.5+0.5,
+      a: Math.random()*0.3+0.05
+    });
+  }
+}
+
+function resizeBg(){
+  bgW = window.innerWidth; bgH = window.innerHeight;
+  bgCanvas.width = bgW; bgCanvas.height = bgH;
+}
+
+function drawBg(t){
+  bgCtx.clearRect(0,0,bgW,bgH);
+  bgParticles.forEach(p=>{
+    p.x += p.vx; p.y += p.vy;
+    if(p.x<0) p.x=bgW; if(p.x>bgW) p.x=0;
+    if(p.y<0) p.y=bgH; if(p.y>bgH) p.y=0;
+    const flicker = p.a + Math.sin(t*0.002+p.x)*0.05;
+    bgCtx.fillStyle = `rgba(136,136,184,${flicker})`;
+    bgCtx.beginPath();
+    bgCtx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+    bgCtx.fill();
+  });
+
+  // Draw subtle connections
+  bgCtx.strokeStyle = 'rgba(136,136,184,0.02)';
+  bgCtx.lineWidth = 0.5;
+  for(let i=0;i<bgParticles.length;i++){
+    for(let j=i+1;j<bgParticles.length;j++){
+      const dx=bgParticles[i].x-bgParticles[j].x;
+      const dy=bgParticles[i].y-bgParticles[j].y;
+      if(dx*dx+dy*dy<15000){
+        bgCtx.beginPath();
+        bgCtx.moveTo(bgParticles[i].x, bgParticles[i].y);
+        bgCtx.lineTo(bgParticles[j].x, bgParticles[j].y);
+        bgCtx.stroke();
+      }
+    }
+  }
+}
+
+// ── ANIMATION LOOP ──
+function animate(t=0){
+  drawBg(t);
+  drawStarmap(t);
+  requestAnimationFrame(animate);
+}
+
+// ── SCAN ──
+function runScan(){
+  scanActive = true;
+  scanFrame = 0;
+  update();
+}
+
+// ── DOWNLOAD ──
+function downloadReport(){
+  const p = getParams();
+  const report = {
+    protocol: "THE-RECALIBRATION-PROTOCOL",
+    version: "1.0.0",
+    timestamp: new Date().toISOString(),
+    phase_1_diagnostic: {
+      inputs: p,
+      computed: {
+        psi_hard: state.psiH,
+        psi_soft: state.psiS,
+        hypocrisy_delta: state.delta,
+        xi_efficiency: state.xi,
+        gamma_resilience: state.gamma,
+        coherence_cost: state.costK,
+        exclusion_product: state.excl,
+        alpha_vector: state.alphaV,
+        plenitude: state.plen,
+        triangle_intact: state.triOk,
+        alignment_v1: state.alignV1,
+        alignment_v6: state.alignV6,
+        preservation_holds: state.presOk
+      },
+      state: document.getElementById('oState').textContent,
+    },
+    phase_2_paths: PATHS.map(path=>({
+      id: path.id,
+      label: path.label,
+      triggered: path.trigger(state)
+    })),
+    source: "Proyecto Estrella · Rafa — The Architect · CC BY-SA 4.0"
+  };
+  const blob = new Blob([JSON.stringify(report,null,2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `recalibration-report-${Date.now()}.json`;
+  a.click(); URL.revokeObjectURL(url);
+}
+
+// ── GO ──
+init();
+</script>
+</body>
+</html>
