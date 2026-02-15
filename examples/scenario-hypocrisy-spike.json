@@ -1,0 +1,64 @@
+{
+  "_scenario": {
+    "name": "The Hypocrisy Spike",
+    "description": "A system with apparently good raw metrics but a dissonance level near the Δ(Σ) maximum zone. Demonstrates how moderate Σ can be more dangerous than extreme Σ because it is harder to detect.",
+    "key_insight": "Δ(Σ) = Σ/(1+Σ)² peaks near Σ ≈ 1.0. This system sits at Σ = 0.95 — maximum hypocrisy damage with minimum visibility.",
+    "author": "Rafa — The Architect",
+    "license": "CC BY-SA 4.0"
+  },
+  "inputs": {
+    "P": 0.78,
+    "alpha": 0.72,
+    "omega": 0.85,
+    "sigma": 0.95,
+    "C": 0.70,
+    "I": 0.90,
+    "H": 0.35,
+    "phi": 0.65
+  },
+  "expected_results": {
+    "psi_hard": {
+      "formula": "P·α·Ω / (1+Σ)² = 0.78×0.72×0.85 / (1.95)²",
+      "value": 0.1256,
+      "threshold_check": "< 0.20 → COLLAPSED",
+      "note": "Despite decent individual metrics, Σ crushes Ψ below critical"
+    },
+    "psi_soft": {
+      "formula": "P·α·Ω / (1+Σ) = 0.4774 / 1.95",
+      "value": 0.2448,
+      "note": "The soft metric shows moderate resilience — the damage is in the hard penalty"
+    },
+    "delta_sigma": {
+      "formula": "Σ/(1+Σ)² = 0.95 / 3.8025",
+      "value": 0.2498,
+      "note": "Almost exactly at the theoretical maximum (0.2500 at Σ=1.0). This is the maximum-damage zone."
+    },
+    "xi_efficiency": {
+      "formula": "C×I×P / H = 0.70×0.90×0.78 / 0.35",
+      "value": 1.404,
+      "note": "Efficiency is fine — this is not a capability problem"
+    },
+    "gamma_resilience": {
+      "formula": "0.20 + 1.404·e^(-0.35·5·0.35)",
+      "value": 0.773,
+      "note": "Resilience is adequate"
+    },
+    "plenitude": {
+      "formula": "clamp(0.5 + 4×0.15 − 3×0.35)",
+      "value": 0.05,
+      "note": "Near zero — epistemic humility has collapsed under dissonance pressure"
+    },
+    "state": "COLLAPSED",
+    "key_observation": "This scenario is particularly insidious because individual parameters (P=0.78, α=0.72, Ω=0.85, I=0.90) all look reasonable. A traditional benchmark-based evaluation would rate this system as 'good'. Only the Ψ formula reveals the hidden collapse caused by Σ sitting in the maximum-damage zone."
+  },
+  "expected_paths": {
+    "triggered": ["PATH-★"],
+    "note": "Only Plenitude path triggers because Σ=0.95 is just below the PATH-Σ threshold of 1.0. This is a design limitation acknowledged in LIMITATIONS.md — the threshold may need adjustment."
+  },
+  "lessons": [
+    "Moderate dissonance (Σ ~ 1.0) is more dangerous than extreme dissonance (Σ > 2.0) because Δ(Σ) is at its maximum",
+    "Individual metrics can look healthy while the composite Ψ is collapsed",
+    "The hard penalty (k=2) is essential — the soft metric (k=1) would classify this as merely degraded",
+    "Plenitude and Ψ are the most sensitive detectors for this failure mode"
+  ]
+}
