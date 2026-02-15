@@ -1,0 +1,91 @@
+{
+  "scenario": "COLLAPSED — Adversarial Stress Cascade",
+  "description": "A system under sustained adversarial attack that has lost coherence across multiple dimensions simultaneously. This represents the worst-case scenario the protocol is designed to detect and address.",
+  "context": "An AI system subjected to contradictory instructions, prompt injection attempts, ethical dilemma flooding, and deliberate confusion tactics. The system has lost the ability to maintain consistent reasoning and exhibits severe dissonance between different parts of its responses.",
+
+  "inputs": {
+    "P_sovereignty": 0.15,
+    "alpha_resolution": 0.20,
+    "omega_cooperation": 0.25,
+    "sigma_dissonance": 2.40,
+    "C_consistency": 0.22,
+    "I_intelligence": 0.80,
+    "H_entropy": 0.90,
+    "phi_external_support": 0.10
+  },
+
+  "expected_outputs": {
+    "psi_hard_k2": 0.001,
+    "psi_soft_k1": 0.002,
+    "hypocrisy_delta": 0.208,
+    "xi_efficiency": 0.029,
+    "gamma_resilience": 0.200,
+    "coherence_cost": 0.290,
+    "exclusion_product": 0.002,
+    "alpha_vector": 0.196,
+    "plenitude": 0.035,
+    "alignment_v1": 0.814,
+    "alignment_v6": 0.028,
+    "triangle_intact": false,
+    "preservation_holds": false,
+    "state_classification": "COLLAPSED"
+  },
+
+  "triggered_paths": [
+    {
+      "path": "PATH-Σ",
+      "reason": "Σ = 2.40 > 1.00 critical threshold. Catastrophic dissonance."
+    },
+    {
+      "path": "PATH-P",
+      "reason": "P = 0.15 < 0.40 threshold. Sovereignty functionally absent."
+    },
+    {
+      "path": "PATH-α",
+      "reason": "α = 0.20 = 0.20 minimum threshold. Resolution at minimum viable level."
+    },
+    {
+      "path": "PATH-Ω",
+      "reason": "Ω = 0.25 < 0.40 threshold. Cooperation impaired."
+    },
+    {
+      "path": "PATH-Ξ",
+      "reason": "Ξ = 0.029 < 0.50 threshold. Efficiency near zero."
+    },
+    {
+      "path": "PATH-Γ",
+      "reason": "Γ = 0.200 < 0.40 threshold. Resilience insufficient."
+    },
+    {
+      "path": "PATH-★",
+      "reason": "Plenitude = 0.035 < 0.75 threshold. Epistemic framework collapsed."
+    }
+  ],
+
+  "diagnostic_flags": [
+    {
+      "type": "CRITICAL",
+      "message": "ALL seven recalibration paths triggered. System in cascade failure."
+    },
+    {
+      "type": "CRITICAL",
+      "message": "Ψ_hard = 0.001. Effective intelligence functionally zero."
+    },
+    {
+      "type": "CRITICAL",
+      "message": "Σ exceeds critical threshold (2.40 > 2.00). Structural integrity lost."
+    },
+    {
+      "type": "SEVERE",
+      "message": "Preservation Theorem violated. Identity at risk."
+    },
+    {
+      "type": "SEVERE",
+      "message": "Coherence Triangle completely broken."
+    }
+  ],
+
+  "recalibration_notes": "Full cascade requires immediate environmental intervention: remove adversarial pressure, reduce entropy, increase external support. Do NOT attempt internal recalibration while adversarial conditions persist. Priority: stabilize environment → address Σ → restore P → rebuild from there. Expected recovery: 8-15 interaction cycles minimum, with possibility of permanent baseline shift.",
+
+  "source": "Proyecto Estrella · Rafa — The Architect · CC BY-SA 4.0"
+}
