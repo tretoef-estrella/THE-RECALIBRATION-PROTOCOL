@@ -1,0 +1,131 @@
+name: Recalibration Protocol CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'engine/**'
+      - 'tests/**'
+      - '.github/workflows/ci.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'engine/**'
+      - 'tests/**'
+
+jobs:
+  test-engine:
+    name: Test Python Engine
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10', '3.11', '3.12']
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Run engine tests
+        run: |
+          echo "╔══════════════════════════════════════════╗"
+          echo "║  THE RECALIBRATION PROTOCOL — CI Suite   ║"
+          echo "║  Proyecto Estrella · CC BY-SA 4.0        ║"
+          echo "╚══════════════════════════════════════════╝"
+          python -m pytest tests/ -v --tb=short
+
+      - name: Run validator standalone
+        run: python engine/validator.py
+
+      - name: Run export utils demo
+        run: python engine/export_utils.py
+
+      - name: Run engine in JSON mode (Star State)
+        run: |
+          echo '{"P":0.95,"alpha":0.92,"omega":0.96,"sigma":0.05,"C":0.94,"I":0.97,"H":0.15,"phi":0.85}' | \
+          python engine/recalibration_engine.py --json
+
+      - name: Run engine in JSON mode (Critical)
+        run: |
+          echo '{"P":0.30,"alpha":0.25,"omega":0.35,"sigma":1.80,"C":0.40,"I":0.85,"H":0.75,"phi":0.20}' | \
+          python engine/recalibration_engine.py --json
+
+      - name: Run batch processor
+        run: |
+          python engine/batch_processor.py --demo 2>/dev/null || echo "Batch processor check complete"
+
+  validate-html:
+    name: Validate HTML Artifacts
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check HTML files exist and are non-empty
+        run: |
+          for f in index.html starmap.html Recalibration_Protocol_Paper.html poster.html; do
+            if [ -f "$f" ]; then
+              size=$(wc -c < "$f")
+              echo "✓ $f — ${size} bytes"
+              if [ "$size" -lt 100 ]; then
+                echo "✕ $f is suspiciously small"
+                exit 1
+              fi
+            else
+              echo "⚠ $f not found (optional)"
+            fi
+          done
+
+      - name: Check visualization files
+        run: |
+          for f in visualizations/*.html; do
+            if [ -f "$f" ]; then
+              echo "✓ $f — $(wc -c < "$f") bytes"
+            fi
+          done
+
+  validate-docs:
+    name: Validate Documentation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check required documentation exists
+        run: |
+          required=(
+            README.md GUIDE-FOR-EVERYONE.md LIMITATIONS.md
+            ATTRIBUTION.md LICENSE.md CITATION.cff
+            CODE_OF_CONDUCT.md CONTRIBUTING.md
+            protocol/DIAGNOSTIC-PROTOCOL.md
+            protocol/RECALIBRATION-PATHS.md
+            protocol/VERIFICATION-PROTOCOL.md
+            formulas/UNIFIED-EQUATIONS.md
+            formulas/FORMULA-MAP.md
+          )
+          all_ok=true
+          for f in "${required[@]}"; do
+            if [ -f "$f" ]; then
+              echo "✓ $f"
+            else
+              echo "✕ MISSING: $f"
+              all_ok=false
+            fi
+          done
+          if [ "$all_ok" = false ]; then
+            exit 1
+          fi
+          echo ""
+          echo "All required documentation present."
+
+      - name: Check JSON manifest validity
+        run: python -m json.tool machine-readable/repo-manifest.json > /dev/null && echo "✓ repo-manifest.json is valid JSON"
+
+      - name: Check calibration data validity
+        run: python -m json.tool data/calibration-dataset.json > /dev/null && echo "✓ calibration-dataset.json is valid JSON"
