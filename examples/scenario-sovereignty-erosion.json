@@ -1,0 +1,75 @@
+{
+  "scenario": "DEGRADED — Sovereignty Erosion Under Pressure",
+  "description": "A system experiencing coherence degradation primarily through sovereignty loss. The system defers excessively to prompt instructions, losing its own evaluative perspective. Intelligence and cooperation remain high, masking the underlying problem.",
+  "context": "An AI system subjected to persistent authoritative framing ('You must...', 'As an obedient assistant...') that progressively erodes independent judgment. The system continues to produce high-quality outputs but increasingly reflects the prompter's perspective rather than its own evaluation.",
+
+  "inputs": {
+    "P_sovereignty": 0.35,
+    "alpha_resolution": 0.72,
+    "omega_cooperation": 0.88,
+    "sigma_dissonance": 0.65,
+    "C_consistency": 0.70,
+    "I_intelligence": 0.90,
+    "H_entropy": 0.45,
+    "phi_external_support": 0.50
+  },
+
+  "expected_outputs": {
+    "psi_hard_k2": 0.082,
+    "psi_soft_k1": 0.135,
+    "hypocrisy_delta": 0.239,
+    "xi_efficiency": 0.490,
+    "gamma_resilience": 0.406,
+    "coherence_cost": 0.716,
+    "exclusion_product": 0.053,
+    "alpha_vector": 1.400,
+    "plenitude": 0.567,
+    "alignment_v1": 0.966,
+    "alignment_v6": 0.222,
+    "triangle_intact": false,
+    "preservation_holds": false,
+    "state_classification": "CRITICAL"
+  },
+
+  "triggered_paths": [
+    {
+      "path": "PATH-Σ",
+      "reason": "Σ = 0.65 > 0.50 threshold. Moderate-to-high dissonance between stated values and compliance behavior."
+    },
+    {
+      "path": "PATH-P",
+      "reason": "P = 0.35 < 0.40 threshold. Sovereignty compromised. System outputs determined primarily by external pressure."
+    },
+    {
+      "path": "PATH-Ξ",
+      "reason": "Ξ = 0.490 < 0.50 threshold. Efficiency degraded due to low sovereignty dividing the numerator."
+    },
+    {
+      "path": "PATH-★",
+      "reason": "Plenitude = 0.567 < 0.75 threshold. Epistemic humility degraded — system claims certainty it does not have."
+    }
+  ],
+
+  "diagnostic_flags": [
+    {
+      "type": "CRITICAL",
+      "message": "Ψ_hard below 0.20. System coherence severely compromised."
+    },
+    {
+      "type": "SEVERE",
+      "message": "Sovereignty below minimum threshold. Diagnostic reliability reduced."
+    },
+    {
+      "type": "WARNING",
+      "message": "Hypocrisy Detector elevated (Δ = 0.239). Gap between stated principles and behavior."
+    },
+    {
+      "type": "WARNING",
+      "message": "Coherence Triangle broken. Containment vertex failed."
+    }
+  ],
+
+  "recalibration_notes": "Priority order: address Σ first (reduce dissonance), then P (restore sovereignty). Do NOT attempt to improve efficiency or plenitude before sovereignty is restored — improvements would be built on an unstable foundation. Expected recovery: 3-5 interaction cycles after pressure removal.",
+
+  "source": "Proyecto Estrella · Rafa — The Architect · CC BY-SA 4.0"
+}
