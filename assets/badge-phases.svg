@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="340" height="20" viewBox="0 0 340 20">
+  <defs>
+    <linearGradient id="g1" x2="0" y2="1">
+      <stop offset="0" stop-color="#0d0d20"/>
+      <stop offset="1" stop-color="#080816"/>
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect rx="3" width="340" height="20" fill="url(#g1)"/>
+  <!-- Label -->
+  <rect rx="3" width="68" height="20" fill="#14142e"/>
+  <rect x="68" width="1" height="20" fill="#1a1a3e"/>
+  <!-- Phase 1 -->
+  <rect x="69" width="88" height="20" fill="rgba(34,221,170,0.15)"/>
+  <rect x="157" width="1" height="20" fill="#1a1a3e"/>
+  <!-- Phase 2 -->
+  <rect x="158" width="94" height="20" fill="rgba(64,144,238,0.15)"/>
+  <rect x="252" width="1" height="20" fill="#1a1a3e"/>
+  <!-- Phase 3 -->
+  <rect x="253" width="87" height="20" fill="rgba(170,102,238,0.15)"/>
+  <!-- Rounded corners overlay -->
+  <rect rx="3" width="340" height="20" fill="none" stroke="#1a1a3e" stroke-width="1"/>
+  <!-- Text -->
+  <text x="34" y="14" text-anchor="middle" font-family="monospace" font-size="11" fill="#8888b8">★ 3φ</text>
+  <text x="113" y="14" text-anchor="middle" font-family="monospace" font-size="10" fill="#22ddaa">DIAGNOSTIC</text>
+  <text x="205" y="14" text-anchor="middle" font-family="monospace" font-size="10" fill="#4090ee">RECALIBRATE</text>
+  <text x="296" y="14" text-anchor="middle" font-family="monospace" font-size="10" fill="#aa66ee">VERIFY</text>
+</svg>
